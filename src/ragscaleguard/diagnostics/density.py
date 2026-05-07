@@ -20,6 +20,8 @@ class CorpusDensityAnalyser:
         self.similarity_threshold = similarity_threshold
 
     def analyse(self, documents: list[Document], nearest_k: int = 5) -> list[DensityFinding]:
+        if nearest_k < 0:
+            raise ValueError("nearest_k must be greater than or equal to zero")
         embeddings = [self.embedder(document.text) for document in documents]
         findings: list[DensityFinding] = []
         for idx, document in enumerate(documents):
@@ -30,17 +32,14 @@ class CorpusDensityAnalyser:
             ]
             similarities.sort(key=lambda item: item[1], reverse=True)
             dense_count = sum(1 for _, score in similarities if score >= self.similarity_threshold)
-            mean_similarity = (
-                sum(score for _, score in similarities[:nearest_k]) / min(len(similarities), nearest_k)
-                if similarities
-                else 0.0
-            )
+            nearest = similarities[:nearest_k] if nearest_k else []
+            mean_similarity = sum(score for _, score in nearest) / len(nearest) if nearest else 0.0
             findings.append(
                 DensityFinding(
                     document_id=document.id,
                     neighbours_above_threshold=dense_count,
                     mean_similarity=mean_similarity,
-                    nearest_document_ids=tuple(doc_id for doc_id, _ in similarities[:nearest_k]),
+                    nearest_document_ids=tuple(doc_id for doc_id, _ in nearest),
                 )
             )
         return sorted(
@@ -48,4 +47,3 @@ class CorpusDensityAnalyser:
             key=lambda finding: (finding.neighbours_above_threshold, finding.mean_similarity),
             reverse=True,
         )
-

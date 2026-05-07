@@ -13,6 +13,8 @@ Embedder = Callable[[str], Vector]
 
 
 def hashing_embed(text: str, dimensions: int = 128) -> Vector:
+    if dimensions <= 0:
+        raise ValueError("dimensions must be greater than zero")
     vector = [0.0] * dimensions
     for token in tokenize(text):
         digest = hashlib.blake2b(token.encode("utf-8"), digest_size=8).digest()

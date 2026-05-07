@@ -19,6 +19,10 @@ class BM25Retriever:
     def __init__(self, documents: list[Document], config: BM25Config | None = None) -> None:
         self.documents = documents
         self.config = config or BM25Config()
+        if self.config.k1 <= 0:
+            raise ValueError("BM25 k1 must be greater than zero")
+        if not 0 <= self.config.b <= 1:
+            raise ValueError("BM25 b must be between 0 and 1")
         self.doc_terms = [term_counts(doc.text) for doc in documents]
         self.doc_lengths = [sum(terms.values()) for terms in self.doc_terms]
         self.avg_doc_length = sum(self.doc_lengths) / max(len(self.doc_lengths), 1)

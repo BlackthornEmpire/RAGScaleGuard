@@ -41,6 +41,7 @@ python examples/serve_dashboard.py
 ```
 
 When served locally, dashboard events and error states are written to `reports/dashboard-events.jsonl`.
+The local event endpoint accepts only bounded JSON events, redacts common secret fields, and rotates the event log before unbounded growth.
 
 ## Local Corpus Evaluation
 

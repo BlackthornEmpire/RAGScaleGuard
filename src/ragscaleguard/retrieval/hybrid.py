@@ -25,6 +25,12 @@ class HybridRetriever:
         validate_unique_document_ids(documents)
         self.documents = documents
         self.config = config or HybridConfig()
+        if self.config.dense_weight < 0 or self.config.bm25_weight < 0:
+            raise ValueError("Hybrid weights must be greater than or equal to zero")
+        if self.config.dense_weight == 0 and self.config.bm25_weight == 0:
+            raise ValueError("At least one hybrid weight must be greater than zero")
+        if self.config.candidate_multiplier < 1:
+            raise ValueError("candidate_multiplier must be greater than or equal to one")
         self.dense = DenseRetriever(documents, embedder=embedder)
         self.bm25 = BM25Retriever(documents)
 

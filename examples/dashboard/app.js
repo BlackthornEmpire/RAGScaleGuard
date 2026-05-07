@@ -416,7 +416,7 @@ function fixSuggestions(state) {
     suggestions.push(["Safe model handoff", "Send only approved context to the model and keep citation checks active."]);
   }
   suggestions.push([
-    "Optional model advisor",
+    "Optional model adviser",
     "Attach a suggestion provider to turn guard issues into remediation text for your team.",
   ]);
   return suggestions;
@@ -468,7 +468,7 @@ function updatePipelineView(state) {
     const span = document.createElement("span");
     strong.textContent = title;
     span.textContent = body;
-    li.className = title === "Block generation" ? "error" : title === "Optional model advisor" ? "" : state.severity;
+    li.className = title === "Block generation" ? "error" : title === "Optional model adviser" ? "" : state.severity;
     li.append(strong, span);
     output.fixSuggestions.append(li);
   });

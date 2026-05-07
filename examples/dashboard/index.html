@@ -28,14 +28,30 @@
         </div>
       </section>
 
+      <section class="panel guide-panel" aria-labelledby="guide-title">
+        <div class="panel-heading">
+          <div>
+            <h2 id="guide-title">How to use this</h2>
+            <p>Start with the run setup, run the comparison, then read the red or amber areas first.</p>
+          </div>
+          <span>Guide</span>
+        </div>
+        <ol class="guide-steps">
+          <li><strong>Choose a case</strong><span>Select the question type and retriever you want to inspect.</span></li>
+          <li><strong>Set pressure</strong><span>Increase corpus size or reduce top-k to see where retrieval weakens.</span></li>
+          <li><strong>Run comparison</strong><span>Watch the live progress and full pipeline view update stage by stage.</span></li>
+          <li><strong>Act on warnings</strong><span>Use bottlenecks, fix suggestions and candidate evidence to decide the next change.</span></li>
+        </ol>
+      </section>
+
       <section class="panel quick-start" aria-labelledby="controls-title">
         <div>
-          <h2 id="controls-title">Run setup</h2>
+          <h2 id="controls-title">Run setup <button class="info-button" type="button" aria-label="Run setup help" data-info="Use this area to shape the retrieval scenario before running the pipeline."></button></h2>
           <p>Pick the scenario, choose the retriever, then run the comparison.</p>
         </div>
 
         <div class="control-set">
-          <label for="queryType">Question type</label>
+          <label for="queryType">Question type <button class="info-button" type="button" aria-label="Question type help" data-info="This changes the kind of answer the retriever must find, such as a deadline, decision or conflict."></button></label>
           <select id="queryType">
             <option value="deadline">Specific deadline</option>
             <option value="decision">Decision source</option>
@@ -46,7 +62,7 @@
         </div>
 
         <div class="control-set">
-          <label for="retriever">Retriever</label>
+          <label for="retriever">Retriever <button class="info-button" type="button" aria-label="Retriever help" data-info="Compare dense, keyword, hybrid and reranked retrieval behaviour under the same scenario."></button></label>
           <select id="retriever">
             <option value="dense">Dense only</option>
             <option value="bm25">BM25 only</option>
@@ -57,7 +73,7 @@
 
         <div class="control-set">
           <div class="range-row">
-            <label for="corpusSize">Corpus size</label>
+            <label for="corpusSize">Corpus size <button class="info-button" type="button" aria-label="Corpus size help" data-info="Higher values simulate more documents competing for the same answer slots."></button></label>
             <output id="corpusSizeValue" for="corpusSize">80k</output>
           </div>
           <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
@@ -65,7 +81,7 @@
 
         <div class="control-set compact">
           <div class="range-row">
-            <label for="topK">Top-k</label>
+            <label for="topK">Top-k <button class="info-button" type="button" aria-label="Top-k help" data-info="This is how many candidates are allowed through. Too low can miss evidence, too high can reduce precision."></button></label>
             <output id="topKValue" for="topK">8</output>
           </div>
           <input id="topK" type="range" min="1" max="30" step="1" value="8">
@@ -80,7 +96,7 @@
       <section class="dashboard-grid" aria-label="Dashboard controls and results">
         <section class="panel progress-panel" aria-labelledby="progress-title">
           <div class="panel-heading">
-            <h2 id="progress-title">Live progress</h2>
+            <h2 id="progress-title">Live progress <button class="info-button" type="button" aria-label="Live progress help" data-info="This shows the current run moving through each guard stage. Red means the stage found a blocking issue."></button></h2>
             <span id="progressState">Idle</span>
           </div>
           <div class="progress-track" aria-hidden="true">
@@ -92,7 +108,7 @@
         <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
           <div class="panel-heading">
             <div>
-              <h2 id="pipeline-title">Full pipeline view</h2>
+              <h2 id="pipeline-title">Full pipeline view <button class="info-button" type="button" aria-label="Full pipeline view help" data-info="This shows where RAGScaleGuard plugs into an existing retriever and where it allows or blocks model handoff."></button></h2>
               <p>Trace the guard from the existing app through retrieval, diagnosis, LLM gating and logging.</p>
             </div>
             <span id="pipelineHealth">Ready</span>
@@ -100,22 +116,22 @@
           <div id="pipelineGraph" class="pipeline-graph" aria-live="polite"></div>
           <div class="pipeline-detail-grid">
             <section aria-labelledby="bottleneck-title">
-              <h3 id="bottleneck-title">Bottlenecks</h3>
+              <h3 id="bottleneck-title">Bottlenecks <button class="info-button" type="button" aria-label="Bottlenecks help" data-info="These show which parts are under pressure, such as candidate crowding, rerank work or conflict review."></button></h3>
               <ul id="bottleneckList" class="bottleneck-list"></ul>
             </section>
             <section aria-labelledby="fix-title">
-              <h3 id="fix-title">Fix suggestions</h3>
+              <h3 id="fix-title">Fix suggestions <button class="info-button" type="button" aria-label="Fix suggestions help" data-info="These are practical next actions. They can later be expanded by an optional local adviser model."></button></h3>
               <ul id="fixSuggestions" class="suggestion-list"></ul>
             </section>
             <section aria-labelledby="adapter-title">
-              <h3 id="adapter-title">Adapter output</h3>
+              <h3 id="adapter-title">Adapter output <button class="info-button" type="button" aria-label="Adapter output help" data-info="This previews the guard decision an existing RAG or LLM system would receive."></button></h3>
               <pre id="adapterOutput" class="adapter-output"></pre>
             </section>
           </div>
         </section>
 
         <section class="panel metrics" aria-labelledby="metrics-title">
-          <h2 id="metrics-title">Retrieval quality</h2>
+          <h2 id="metrics-title">Retrieval quality <button class="info-button" type="button" aria-label="Retrieval quality help" data-info="Use these scores to see whether the retriever is finding the right evidence and avoiding irrelevant context."></button></h2>
           <div class="metric-grid">
             <article>
               <span>Recall@k</span>
@@ -141,7 +157,7 @@
         </section>
 
         <section id="diagnosticsPanel" class="panel diagnostics" aria-labelledby="diagnostics-title">
-          <h2 id="diagnostics-title">What to do next</h2>
+          <h2 id="diagnostics-title">What to do next <button class="info-button" type="button" aria-label="What to do next help" data-info="This is the main action panel. Start here when a run turns amber or red."></button></h2>
           <dl>
             <div>
               <dt>Top-k status</dt>
@@ -159,7 +175,7 @@
         </section>
 
         <section class="panel results" aria-labelledby="results-title">
-          <h2 id="results-title">Candidate evidence</h2>
+          <h2 id="results-title">Candidate evidence <button class="info-button" type="button" aria-label="Candidate evidence help" data-info="These are the documents the retriever would send towards generation. Similar but incomplete evidence is a warning sign."></button></h2>
           <div class="table-wrap">
             <table>
               <thead>
@@ -176,10 +192,10 @@
         </section>
 
         <details class="panel advanced-panel">
-          <summary>Advanced controls and review</summary>
+          <summary>Advanced controls and review <button class="info-button" type="button" aria-label="Advanced controls help" data-info="Use these switches to test metadata, authority, freshness and conflict controls."></button></summary>
           <div class="advanced-grid">
             <section aria-label="Hardening signals">
-              <h3>Hardening signals</h3>
+              <h3>Hardening signals <button class="info-button" type="button" aria-label="Hardening signals help" data-info="These controls simulate extra ranking and safety signals used before model generation."></button></h3>
               <div class="toggle-list">
                 <label><input id="metadata" type="checkbox" checked> Metadata scoring</label>
                 <label><input id="authority" type="checkbox" checked> Authority scoring</label>
@@ -188,12 +204,12 @@
               </div>
             </section>
             <section aria-labelledby="review-title">
-              <h3 id="review-title">Review queue</h3>
+              <h3 id="review-title">Review queue <button class="info-button" type="button" aria-label="Review queue help" data-info="Items here need attention before trusting the generated answer."></button></h3>
               <p><strong id="reviewCount">1 item</strong></p>
               <ul id="reviewItems"></ul>
             </section>
             <section aria-labelledby="log-title">
-              <h3 id="log-title">Event log</h3>
+              <h3 id="log-title">Event log <button class="info-button" type="button" aria-label="Event log help" data-info="This shows recent dashboard events. When served locally, events are also written to the external log file."></button></h3>
               <p id="lastRun">Not started</p>
               <p id="evidencePolicy">Cite top candidate and flag conflicts</p>
               <p>External log: <code>reports/dashboard-events.jsonl</code></p>

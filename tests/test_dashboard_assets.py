@@ -49,6 +49,8 @@ def test_dashboard_has_operational_control_sections() -> None:
     ]
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
+    assert "How to use this" in html
+    assert "info-button" in html
 
 
 def test_dashboard_has_severity_and_external_logging_controls() -> None:
@@ -75,6 +77,24 @@ def test_dashboard_has_full_pipeline_visualisation() -> None:
     assert ".pipeline-graph" in styles
     assert ".pipeline-node.error" in styles
     assert ".bottleneck-meter" in styles
+
+
+def test_dashboard_copy_uses_uk_english_for_visible_text() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+
+    blocked_visible_terms = [
+        "be" + "havior",
+        "ad" + "visor",
+        "ana" + "lyze",
+        "auth" + "orized",
+        "cen" + "tered",
+        chr(8212),
+        chr(8211),
+    ]
+    visible_copy = f"{html}\n{script}"
+    for term in blocked_visible_terms:
+        assert term not in visible_copy
 
 
 def test_dashboard_launcher_defaults_to_localhost() -> None:

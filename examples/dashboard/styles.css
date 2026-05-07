@@ -131,6 +131,45 @@ dt,
   padding: 16px;
 }
 
+.guide-panel {
+  margin-bottom: 14px;
+}
+
+.guide-panel .panel-heading p {
+  max-width: 680px;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.guide-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-steps li {
+  min-height: 94px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b0813;
+  padding: 12px;
+}
+
+.guide-steps strong,
+.guide-steps span {
+  display: block;
+}
+
+.guide-steps span {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .quick-start p {
   margin-top: 8px;
   color: var(--muted);
@@ -145,6 +184,75 @@ dt,
   color: var(--muted);
   font-size: 0.85rem;
   font-weight: 750;
+}
+
+h2,
+h3,
+label,
+summary {
+  overflow-wrap: anywhere;
+}
+
+h2 .info-button,
+h3 .info-button,
+label .info-button,
+summary .info-button {
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.info-button {
+  position: relative;
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  place-items: center;
+  border: 1px solid #6d4fc5;
+  border-radius: 999px;
+  background: #0b0813;
+  color: var(--accent-2);
+  cursor: help;
+  padding: 0;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.info-button::before {
+  content: "i";
+}
+
+.info-button::after {
+  content: attr(data-info);
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  width: min(260px, 78vw);
+  transform: translateX(-50%);
+  border: 1px solid #5b4688;
+  border-radius: 8px;
+  background: #110d1c;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
+  color: var(--ink);
+  display: none;
+  opacity: 0;
+  padding: 10px;
+  pointer-events: none;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.info-button:hover::after,
+.info-button:focus-visible::after {
+  display: block;
+  opacity: 1;
 }
 
 select {
@@ -642,6 +750,7 @@ summary {
 
 @media (max-width: 1060px) {
   .hero,
+  .guide-steps,
   .quick-start,
   .dashboard-grid,
   .pipeline-graph,

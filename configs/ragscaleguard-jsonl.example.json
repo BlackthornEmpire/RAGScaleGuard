@@ -1,0 +1,8 @@
+{
+  "adapter": "jsonl",
+  "questions": "../examples/fixtures/questions.jsonl",
+  "retrieval_runs": "../examples/fixtures/retrieval-runs.jsonl",
+  "report": "../reports/sample-jsonl-report.md",
+  "report_format": "markdown",
+  "top_k": 5
+}

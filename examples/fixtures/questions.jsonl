@@ -1,0 +1,2 @@
+{"id":"q1","question":"What is the approved Atlas rollout deadline?","ground_truth_document_ids":["jira-182"]}
+{"id":"q2","question":"Which source contains the final support policy?","ground_truth_document_ids":["policy-77"]}

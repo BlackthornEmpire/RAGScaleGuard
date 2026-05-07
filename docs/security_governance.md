@@ -24,5 +24,7 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 - Run evaluations inside a controlled working directory or container.
 - Pin dependencies and run `pytest`, `mypy`, and `ruff` in CI.
 - Decide whether hosted rerankers or answer evaluators are allowed to receive document text.
+- Keep HTTP retrieval adapters behind internal networking and server-side authorisation.
+- Pass adapter secrets through environment variables rather than committed config files.
 - Record corpus version, corpus size, retriever settings, embedding model, reranker model, and top-k.
 - Review report artefacts before publishing external summaries or case studies.

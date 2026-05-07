@@ -17,6 +17,8 @@ It is a practical framework for comparing retrieval strategies, finding why top-
 - Provides authority, freshness, and metadata scoring primitives.
 - Detects simple factual conflicts across retrieved evidence.
 - Diagnoses cases where the answer document exists but was pushed out of top-k.
+- Tests existing RAG systems through Python adapters, HTTP retrieval endpoints, or exported JSONL runs.
+- Includes adapters for common LangChain, LlamaIndex, Haystack, generic retriever, HTTP, and JSONL shapes.
 - Produces JSON and Markdown evaluation reports.
 - Redacts common secrets and escapes corpus-controlled fields in reports.
 - Provides deterministic unit tests and extension points for real embeddings, vector stores, and rerankers.
@@ -36,7 +38,23 @@ pytest
 python examples/minimal_local_demo.py
 ```
 
+## Fastest Existing-System Test
+
+Run the ready-made JSONL example:
+
+```bash
+ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
+```
+
+Then copy that config, replace the question and retrieval-run paths, and run it against your own system export.
+
 ## Plug Into Existing RAG Pipelines
+
+RAGScaleGuard is designed to test an existing RAG system without forcing a rewrite. There are three integration paths:
+
+- Native Python adapters for retriever objects.
+- HTTP adapter for any service that exposes a retrieval endpoint.
+- JSONL adapter for systems that can export retrieved candidates.
 
 Use `guard_retrieval` when your system already has retrieved candidates:
 
@@ -62,6 +80,83 @@ decision = guarded.search("What is the approved deadline?", top_k=10)
 ```
 
 The guard returns pipeline stages, blocking issues, approved context, and fix suggestions. A custom suggestion provider can be attached when teams want model-generated remediation advice.
+
+### Framework Adapters
+
+RAGScaleGuard ships dependency-free adapters for common retriever shapes:
+
+```python
+from ragscaleguard.adapters import (
+    HaystackRetrieverAdapter,
+    LangChainRetrieverAdapter,
+    LlamaIndexRetrieverAdapter,
+)
+
+guarded_langchain = LangChainRetrieverAdapter(langchain_retriever)
+guarded_llamaindex = LlamaIndexRetrieverAdapter(llamaindex_retriever)
+guarded_haystack = HaystackRetrieverAdapter(haystack_retriever)
+
+results = guarded_langchain.search("What is the approved deadline?", top_k=10)
+```
+
+### HTTP Endpoint Testing
+
+Any RAG system can be tested if it exposes a retrieval endpoint that accepts:
+
+```json
+{"query": "What is the approved deadline?", "top_k": 10}
+```
+
+and returns:
+
+```json
+{
+  "results": [
+    {
+      "id": "ticket-123",
+      "text": "The approved deadline is 2026-06-01.",
+      "score": 0.92,
+      "metadata": {"source_type": "ticket", "status": "resolved"}
+    }
+  ]
+}
+```
+
+Run it from the command line:
+
+```bash
+ragscaleguard-test \
+  --adapter http \
+  --url http://127.0.0.1:8080/retrieve \
+  --questions questions.jsonl \
+  --report reports/http-retriever.md
+```
+
+### JSONL Export Testing
+
+If the existing system cannot expose an endpoint, export retrieval results as JSONL:
+
+```jsonl
+{"query":"What is the approved deadline?","results":[{"id":"ticket-123","text":"The approved deadline is 2026-06-01.","score":0.92}]}
+```
+
+Then run:
+
+```bash
+ragscaleguard-test \
+  --adapter jsonl \
+  --retrieval-runs retrieval-runs.jsonl \
+  --questions questions.jsonl \
+  --report reports/exported-runs.md
+```
+
+See [docs/integrations.md](docs/integrations.md) for the full adapter guide.
+
+You can also put the same settings in a config file:
+
+```bash
+ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
+```
 
 ## Dashboard Demo
 
@@ -116,6 +211,7 @@ Expected question fields are `id`, `question`, and optional `ground_truth_docume
 - The built-in dense retriever is a deterministic hashing baseline for reproducible tests, not a production embedding model.
 - Conflict detection is conservative and rule-based.
 - Generated-answer faithfulness is represented by citation and retrieval metrics until a user supplies an evaluator.
-- Large-corpus performance depends on the backing retriever/vector store used by integrators.
+- RAGScaleGuard does not auto-discover private enterprise auth, schemas, prompts, or vector stores. Teams connect through the adapter contract, HTTP endpoint, or JSONL export.
+- Large-corpus performance depends on the backing retriever, vector store, and endpoint used by integrators.
 
-See [docs/architecture.md](docs/architecture.md), [docs/evaluation_methodology.md](docs/evaluation_methodology.md), [docs/limitations.md](docs/limitations.md), and [docs/security_governance.md](docs/security_governance.md).
+See [docs/architecture.md](docs/architecture.md), [docs/integrations.md](docs/integrations.md), [docs/evaluation_methodology.md](docs/evaluation_methodology.md), [docs/limitations.md](docs/limitations.md), and [docs/security_governance.md](docs/security_governance.md).

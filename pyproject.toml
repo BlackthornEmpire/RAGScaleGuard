@@ -18,6 +18,7 @@ dev = ["pytest>=8.0", "mypy>=1.10", "ruff>=0.6"]
 
 [project.scripts]
 ragscaleguard-demo = "ragscaleguard.pipelines.hybrid_rerank:main"
+ragscaleguard-test = "ragscaleguard.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ragscaleguard"]
@@ -34,4 +35,3 @@ target-version = "py311"
 python_version = "3.11"
 strict = true
 files = ["src", "tests"]
-

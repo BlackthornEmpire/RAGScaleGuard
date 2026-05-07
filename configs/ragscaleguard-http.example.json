@@ -1,0 +1,12 @@
+{
+  "adapter": "http",
+  "url": "http://127.0.0.1:8080/retrieve",
+  "questions": "../examples/fixtures/questions.jsonl",
+  "report": "../reports/sample-http-report.md",
+  "report_format": "markdown",
+  "top_k": 5,
+  "timeout_seconds": 10,
+  "headers": {
+    "Authorization": "Bearer $RAG_API_TOKEN"
+  }
+}

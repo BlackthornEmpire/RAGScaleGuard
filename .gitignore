@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Local benchmark data and reports can contain proprietary or sensitive text.
+data/
+reports/
+*.jsonl
+*.parquet
+*.zip
+
+# Secrets and local runtime config.
+.env
+.env.*
+!.env.example
+
+# Local project notes for this workspace. Do not publish.
+PROJECT_MEMORY.md

@@ -1,0 +1,11 @@
+dataset:
+  documents_path: data/enterpriserag/all_documents.jsonl
+  questions_path: data/enterpriserag/questions.jsonl
+evaluation:
+  top_k: 10
+  baselines:
+    - dense
+    - bm25
+    - hybrid
+    - hybrid_rerank
+

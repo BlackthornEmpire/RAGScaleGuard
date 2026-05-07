@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ragscaleguard"
+version = "0.1.0"
+description = "Retrieval hardening toolkit for enterprise RAG systems under scale, duplication, fragmentation, and conflicting internal data."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "RAGScaleGuard contributors" }]
+keywords = ["rag", "retrieval", "enterprise-search", "evaluation", "bm25", "reranking"]
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "mypy>=1.10", "ruff>=0.6"]
+
+[project.scripts]
+ragscaleguard-demo = "ragscaleguard.pipelines.hybrid_rerank:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ragscaleguard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+

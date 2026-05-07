@@ -3,13 +3,21 @@ from __future__ import annotations
 import argparse
 import http.server
 import json
+import os
 import re
 import socketserver
+import sys
 import webbrowser
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from ragscaleguard.adviser import AdviserRequest, LocalOpenAIAdviser, validate_adviser_response
+from ragscaleguard.adviser.policy import sanitise_adviser_input, validate_adviser_mode
+
 MAX_EVENT_BYTES = 16_384
+MAX_ADVISER_BYTES = 24_000
 MAX_LOG_BYTES = 1_000_000
 SECRET_RE = re.compile(
     r"(?i)\b(api[_-]?key|token|secret|password)\s*[:=]\s*['\"]?([^'\"\s,}]+)"
@@ -27,33 +35,118 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=directory, **kwargs)
 
     def do_POST(self) -> None:
-        if self.path != "/events":
-            self.send_error(404)
+        if self.path == "/events":
+            self._handle_event()
             return
+        if self.path == "/adviser":
+            self._handle_adviser()
+            return
+        self.send_error(404)
+
+    def _handle_event(self) -> None:
+        body = self._read_json_body(MAX_EVENT_BYTES)
+        if body is None:
+            return
+        event = _normalise_event(body)
+        _write_event(self.log_path, event)
+        self.send_response(204)
+        self.end_headers()
+
+    def _handle_adviser(self) -> None:
+        body = self._read_json_body(MAX_ADVISER_BYTES)
+        if body is None:
+            return
+        mode = validate_adviser_mode(body.get("mode"))
+        if mode == "off":
+            response = validate_adviser_response(
+                {
+                    "problem": "Adviser is off.",
+                    "why_it_matters": "No local model call was made.",
+                    "fix": "Turn on explain mode to request diagnostic advice.",
+                    "risk": "No external adviser call.",
+                },
+                mode,
+            )
+        elif os.environ.get("RAGSCALEGUARD_ADVISER_ENABLED", "false").lower() != "true":
+            response = validate_adviser_response(
+                {
+                    "problem": "Adviser server is disabled.",
+                    "why_it_matters": "The dashboard will not call a local model until the server opt-in is set.",
+                    "fix": "Restart with RAGSCALEGUARD_ADVISER_ENABLED=true and a local OpenAI-compatible endpoint.",
+                    "risk": "No model call was made.",
+                },
+                mode,
+            )
+        else:
+            adviser = LocalOpenAIAdviser(
+                base_url=os.environ.get("RAGSCALEGUARD_ADVISER_BASE_URL", "http://127.0.0.1:11434/v1"),
+                model=os.environ.get("RAGSCALEGUARD_ADVISER_MODEL", "llama3.1"),
+            )
+            try:
+                response = adviser.advise(
+                    AdviserRequest(mode=mode, diagnostics=dict(sanitise_adviser_input(body.get("diagnostics", {}))))
+                )
+            except RuntimeError as exc:
+                response = validate_adviser_response(
+                    {
+                        "problem": "Adviser request failed.",
+                        "why_it_matters": "The retrieval guard still works, but model-generated advice is unavailable.",
+                        "fix": str(exc),
+                        "risk": "Check the local model endpoint before relying on adviser output.",
+                    },
+                    mode,
+                )
+        _write_event(
+            self.log_path,
+            _normalise_event(
+                {
+                    "level": "info",
+                    "message": f"Adviser {mode} request handled.",
+                    "details": {"applied": response.applied, "risk": response.risk},
+                }
+            ),
+        )
+        self._send_json(
+            {
+                "problem": response.problem,
+                "why_it_matters": response.why_it_matters,
+                "fix": response.fix,
+                "risk": response.risk,
+                "mode": response.mode,
+                "applied": response.applied,
+            }
+        )
+
+    def _read_json_body(self, max_bytes: int) -> dict[str, Any] | None:
+        if self.path not in {"/events", "/adviser"}:
+            self.send_error(404)
+            return None
         try:
             content_length = int(self.headers.get("Content-Length", "0"))
         except ValueError:
             self.send_error(400)
-            return
-        if content_length <= 0 or content_length > MAX_EVENT_BYTES:
+            return None
+        if content_length <= 0 or content_length > max_bytes:
             self.send_error(413)
-            return
+            return None
         raw_body = self.rfile.read(content_length)
         try:
-            event = json.loads(raw_body.decode("utf-8"))
+            body = json.loads(raw_body.decode("utf-8"))
         except json.JSONDecodeError:
             self.send_error(400)
-            return
-        if not isinstance(event, dict):
+            return None
+        if not isinstance(body, dict):
             self.send_error(400)
-            return
-        event = _normalise_event(event)
-        self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        _rotate_log_if_needed(self.log_path)
-        with self.log_path.open("a", encoding="utf-8") as log_file:
-            log_file.write(json.dumps(event, sort_keys=True) + "\n")
-        self.send_response(204)
+            return None
+        return body
+
+    def _send_json(self, payload: dict[str, object]) -> None:
+        body = json.dumps(payload, sort_keys=True).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
+        self.wfile.write(body)
 
 
 def _normalise_event(event: dict[str, Any]) -> dict[str, Any]:
@@ -90,6 +183,13 @@ def _rotate_log_if_needed(path: Path) -> None:
         backup = path.with_suffix(path.suffix + ".1")
         backup.unlink(missing_ok=True)
         path.replace(backup)
+
+
+def _write_event(log_path: Path, event: dict[str, object]) -> None:
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    _rotate_log_if_needed(log_path)
+    with log_path.open("a", encoding="utf-8") as log_file:
+        log_file.write(json.dumps(event, sort_keys=True) + "\n")
 
 
 def main() -> None:

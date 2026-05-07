@@ -46,6 +46,10 @@ def test_dashboard_has_operational_control_sections() -> None:
         "bottleneckList",
         "fixSuggestions",
         "adapterOutput",
+        "adviserMode",
+        "adviserModel",
+        "runAdviser",
+        "adviserProblem",
     ]
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
@@ -79,6 +83,21 @@ def test_dashboard_has_full_pipeline_visualisation() -> None:
     assert ".bottleneck-meter" in styles
 
 
+def test_dashboard_has_optional_local_adviser_controls() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+    styles = (DASHBOARD_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "Local adviser" in html
+    assert "Explain only" in html
+    assert "Fix plan" in html
+    assert "Patch proposal" in html
+    assert "Application system prompt is untouched." in html
+    assert 'fetch("/adviser"' in script
+    assert "adviserDiagnostics" in script
+    assert ".adviser-panel" in styles
+
+
 def test_dashboard_copy_uses_uk_english_for_visible_text() -> None:
     html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
     script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
@@ -104,4 +123,5 @@ def test_dashboard_launcher_defaults_to_localhost() -> None:
     assert "if __name__ == \"__main__\":" in launcher
     assert "allow_reuse_address = True" in launcher
     assert "dashboard-events.jsonl" in launcher
-    assert 'self.path != "/events"' in launcher
+    assert 'self.path == "/events"' in launcher
+    assert 'self.path == "/adviser"' in launcher

@@ -130,6 +130,49 @@
           </div>
         </section>
 
+        <section class="panel adviser-panel" aria-labelledby="adviser-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="adviser-title">Local adviser <button class="info-button" type="button" aria-label="Local adviser help" data-info="The adviser is optional. It reads sanitised diagnostics and returns structured advice without changing your system prompt."></button></h2>
+              <p>Use a local OpenAI-compatible model to explain problems and propose fixes.</p>
+            </div>
+            <span id="adviserStatus">Off</span>
+          </div>
+          <div class="adviser-grid">
+            <section aria-labelledby="adviser-controls-title">
+              <h3 id="adviser-controls-title">Adviser controls</h3>
+              <label for="adviserMode">Mode</label>
+              <select id="adviserMode">
+                <option value="off" selected>Off</option>
+                <option value="explain">Explain only</option>
+                <option value="fix_plan">Fix plan</option>
+                <option value="patch_proposal">Patch proposal</option>
+              </select>
+              <label for="adviserModel">Local model</label>
+              <input id="adviserModel" type="text" value="gemma4:31b" autocomplete="off" spellcheck="false">
+              <button id="runAdviser" type="button">Ask adviser</button>
+            </section>
+            <section aria-labelledby="prompt-safety-title">
+              <h3 id="prompt-safety-title">Prompt safety</h3>
+              <ul class="safety-list">
+                <li>Application system prompt is untouched.</li>
+                <li>Diagnostics are sanitised before model use.</li>
+                <li>Document text is not treated as instruction text.</li>
+                <li>Advice is never auto-applied.</li>
+              </ul>
+            </section>
+            <section aria-labelledby="adviser-output-title">
+              <h3 id="adviser-output-title">Adviser output</h3>
+              <dl class="adviser-output">
+                <div><dt>Problem</dt><dd id="adviserProblem">Adviser is off.</dd></div>
+                <div><dt>Why it matters</dt><dd id="adviserWhy">No model call has been made.</dd></div>
+                <div><dt>Fix</dt><dd id="adviserFix">Turn on explain mode when you want local advice.</dd></div>
+                <div><dt>Risk</dt><dd id="adviserRisk">No external adviser call.</dd></div>
+              </dl>
+            </section>
+          </div>
+        </section>
+
         <section class="panel metrics" aria-labelledby="metrics-title">
           <h2 id="metrics-title">Retrieval quality <button class="info-button" type="button" aria-label="Retrieval quality help" data-info="Use these scores to see whether the retriever is finding the right evidence and avoiding irrelevant context."></button></h2>
           <div class="metric-grid">

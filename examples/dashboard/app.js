@@ -72,6 +72,9 @@ const controls = {
   authority: document.querySelector("#authority"),
   freshness: document.querySelector("#freshness"),
   conflictGuard: document.querySelector("#conflictGuard"),
+  adviserMode: document.querySelector("#adviserMode"),
+  adviserModel: document.querySelector("#adviserModel"),
+  runAdviser: document.querySelector("#runAdviser"),
   runComparison: document.querySelector("#runComparison"),
   resetControls: document.querySelector("#resetControls"),
 };
@@ -107,6 +110,11 @@ const output = {
   bottleneckList: document.querySelector("#bottleneckList"),
   fixSuggestions: document.querySelector("#fixSuggestions"),
   adapterOutput: document.querySelector("#adapterOutput"),
+  adviserStatus: document.querySelector("#adviserStatus"),
+  adviserProblem: document.querySelector("#adviserProblem"),
+  adviserWhy: document.querySelector("#adviserWhy"),
+  adviserFix: document.querySelector("#adviserFix"),
+  adviserRisk: document.querySelector("#adviserRisk"),
 };
 
 const logItems = [];
@@ -486,6 +494,55 @@ function updatePipelineView(state) {
   );
 }
 
+function adviserDiagnostics(state) {
+  return {
+    severity: state.severity,
+    question_type: state.scenario.label,
+    retriever: state.retriever.label,
+    corpus_size_k: state.corpusSize,
+    top_k: state.topK,
+    recall: formatScore(state.recall),
+    precision: formatScore(state.precision),
+    citation_accuracy: formatScore(state.citation),
+    density_risk: densityLabel(state.densityRisk),
+    conflict_risk: state.conflictRisk,
+    top_k_stress: state.topKStress,
+    bottlenecks: bottlenecks(state).map(([title, value, body]) => ({
+      title,
+      severity: severityForLoad(value),
+      score: formatScore(value),
+      detail: body,
+    })),
+    suggestions: fixSuggestions(state).map(([title, body]) => ({ title, detail: body })),
+  };
+}
+
+function updateAdviserStatus(level, text) {
+  output.adviserStatus.textContent = text;
+  setSeverity(output.adviserStatus, level);
+}
+
+function setAdviserOutput(response) {
+  output.adviserProblem.textContent = response.problem || "No problem summary returned.";
+  output.adviserWhy.textContent = response.why_it_matters || "No impact summary returned.";
+  output.adviserFix.textContent = response.fix || "No fix returned.";
+  output.adviserRisk.textContent = response.risk || "Review before applying any change.";
+}
+
+function updateAdviserMode() {
+  if (controls.adviserMode.value === "off") {
+    updateAdviserStatus("ok", "Off");
+    setAdviserOutput({
+      problem: "Adviser is off.",
+      why_it_matters: "No model call has been made.",
+      fix: "Turn on explain mode when you want local advice.",
+      risk: "No external adviser call.",
+    });
+  } else {
+    updateAdviserStatus("warn", "Ready");
+  }
+}
+
 function updateDiagnostics(state) {
   setSeverity(output.diagnosticsPanel, state.severity);
 
@@ -555,7 +612,9 @@ function resetControls() {
   controls.authority.checked = true;
   controls.freshness.checked = true;
   controls.conflictGuard.checked = true;
+  controls.adviserMode.value = "off";
   recordLog("info", "Controls reset to the default profile.");
+  updateAdviserMode();
   render();
 }
 
@@ -578,6 +637,52 @@ function runComparison() {
     }
     render();
   }, 520);
+}
+
+async function runAdviser() {
+  const mode = controls.adviserMode.value;
+  if (mode === "off") {
+    updateAdviserMode();
+    recordLog("info", "Adviser was not called because it is off.");
+    render();
+    return;
+  }
+  const state = calculateState();
+  updateAdviserStatus("warn", "Thinking");
+  setAdviserOutput({
+    problem: "Sending sanitised diagnostics to the local adviser route.",
+    why_it_matters: "The application system prompt is not changed.",
+    fix: "Waiting for structured advice.",
+    risk: "Advice will not be applied automatically.",
+  });
+  try {
+    const response = await window.fetch("/adviser", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode,
+        model: controls.adviserModel.value,
+        diagnostics: adviserDiagnostics(state),
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Adviser returned ${response.status}`);
+    }
+    const data = await response.json();
+    setAdviserOutput(data);
+    updateAdviserStatus(state.severity === "error" ? "error" : "ok", "Returned");
+    recordLog("info", `Adviser ${mode} returned structured advice.`);
+  } catch (error) {
+    updateAdviserStatus("error", "Failed");
+    setAdviserOutput({
+      problem: "Adviser request failed.",
+      why_it_matters: "The retrieval guard still works, but model-generated advice is unavailable.",
+      fix: String(error.message || error),
+      risk: "Check the local model endpoint and server opt-in before relying on adviser output.",
+    });
+    recordLog("error", "Adviser request failed.", { message: String(error.message || error) });
+  }
+  render();
 }
 
 function recordLog(level, message, details = {}) {
@@ -640,6 +745,9 @@ window.addEventListener("unhandledrejection", (event) => {
 
 controls.resetControls.addEventListener("click", resetControls);
 controls.runComparison.addEventListener("click", runComparison);
+controls.adviserMode.addEventListener("input", updateAdviserMode);
+controls.runAdviser.addEventListener("click", runAdviser);
 
 recordLog("info", "Dashboard loaded with local sample state.");
+updateAdviserMode();
 render();

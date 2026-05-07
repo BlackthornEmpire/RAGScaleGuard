@@ -5,18 +5,19 @@ from typing import Protocol
 from ragscaleguard.models import Query, SearchResult
 
 
-class LLMScorer(Protocol):
+class ModelScorer(Protocol):
     def score(self, query: Query, result: SearchResult) -> float: ...
 
 
-class LLMReranker:
-    """Adapter for user-supplied LLM/cross-encoder rerankers.
+class ModelReranker:
+    """Adapter for user-supplied model or cross-encoder rerankers.
 
-    RAGScaleGuard does not call a hosted model by default. Production users can pass an object
-    implementing ``LLMScorer`` while preserving deterministic tests for the rest of the pipeline.
+    RAGScaleGuard does not call a hosted model by default. Production users can pass
+    an object implementing ``ModelScorer`` while preserving deterministic tests for
+    the rest of the pipeline.
     """
 
-    def __init__(self, scorer: LLMScorer) -> None:
+    def __init__(self, scorer: ModelScorer) -> None:
         self.scorer = scorer
 
     def rerank(self, query: Query, results: list[SearchResult], top_k: int | None = None) -> list[SearchResult]:
@@ -31,4 +32,3 @@ class LLMReranker:
         ]
         ordered = sorted(scored, key=lambda result: result.score, reverse=True)
         return ordered[:top_k] if top_k is not None else ordered
-

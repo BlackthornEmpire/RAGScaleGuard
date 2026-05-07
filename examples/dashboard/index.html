@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    >
+    <title>RAGScaleGuard Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <h1 id="page-title">RAGScaleGuard</h1>
+          <p>
+            Explore how retrieval settings affect recall, precision, citation quality,
+            neighbourhood density, and conflict handling.
+          </p>
+        </div>
+        <div class="run-card" aria-label="Current run summary">
+          <span class="label">Run profile</span>
+          <strong id="runProfile">Hybrid rerank</strong>
+          <span id="runSummary">Local simulation, 80k corpus, top-k 8</span>
+        </div>
+      </section>
+
+      <section class="dashboard-grid" aria-label="Dashboard controls and results">
+        <aside class="panel controls" aria-labelledby="controls-title">
+          <h2 id="controls-title">Controls</h2>
+
+          <label for="queryType">Question type</label>
+          <select id="queryType">
+            <option value="deadline">Specific deadline</option>
+            <option value="decision">Decision source</option>
+            <option value="spec">Technical spec</option>
+            <option value="customer">Customer request</option>
+            <option value="conflict">Conflicting facts</option>
+          </select>
+
+          <label for="retriever">Retriever</label>
+          <select id="retriever">
+            <option value="dense">Dense only</option>
+            <option value="bm25">BM25 only</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="rerank" selected>Hybrid rerank</option>
+          </select>
+
+          <div class="range-row">
+            <label for="corpusSize">Corpus size</label>
+            <output id="corpusSizeValue" for="corpusSize">80k</output>
+          </div>
+          <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
+
+          <div class="range-row">
+            <label for="topK">Top-k</label>
+            <output id="topKValue" for="topK">8</output>
+          </div>
+          <input id="topK" type="range" min="1" max="30" step="1" value="8">
+
+          <div class="toggle-list" aria-label="Hardening signals">
+            <label><input id="metadata" type="checkbox" checked> Metadata scoring</label>
+            <label><input id="authority" type="checkbox" checked> Authority scoring</label>
+            <label><input id="freshness" type="checkbox" checked> Freshness scoring</label>
+            <label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label>
+          </div>
+        </aside>
+
+        <section class="panel metrics" aria-labelledby="metrics-title">
+          <h2 id="metrics-title">Retrieval quality</h2>
+          <div class="metric-grid">
+            <article>
+              <span>Recall@k</span>
+              <strong id="recallValue">0.00</strong>
+              <div class="bar"><span id="recallBar"></span></div>
+            </article>
+            <article>
+              <span>Precision@k</span>
+              <strong id="precisionValue">0.00</strong>
+              <div class="bar"><span id="precisionBar"></span></div>
+            </article>
+            <article>
+              <span>Citation accuracy</span>
+              <strong id="citationValue">0.00</strong>
+              <div class="bar"><span id="citationBar"></span></div>
+            </article>
+            <article>
+              <span>Density risk</span>
+              <strong id="densityValue">Low</strong>
+              <div class="bar risk"><span id="densityBar"></span></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel diagnostics" aria-labelledby="diagnostics-title">
+          <h2 id="diagnostics-title">Diagnostics</h2>
+          <dl>
+            <div>
+              <dt>Top-k status</dt>
+              <dd id="topKStatus">Ready</dd>
+            </div>
+            <div>
+              <dt>Conflict status</dt>
+              <dd id="conflictStatus">Ready</dd>
+            </div>
+            <div>
+              <dt>Recommended action</dt>
+              <dd id="recommendation">Adjust controls to inspect retrieval behaviour.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel results" aria-labelledby="results-title">
+          <h2 id="results-title">Candidate evidence</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Rank</th>
+                  <th scope="col">Source</th>
+                  <th scope="col">Evidence</th>
+                  <th scope="col">Score</th>
+                </tr>
+              </thead>
+              <tbody id="candidateRows"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
+

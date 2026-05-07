@@ -41,4 +41,4 @@ Security boundaries expected from integrators:
 - Multi-tenant isolation
 - Hosted API security
 - Key management
-- Policy enforcement across external vector stores or LLM providers
+- Policy enforcement across external vector stores or model providers

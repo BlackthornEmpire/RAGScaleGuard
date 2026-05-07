@@ -203,9 +203,17 @@ body {
 .dial-card {
   display: grid;
   justify-items: center;
-  gap: 6px;
+  gap: 4px;
   color: var(--muted);
   font-size: 0.68rem;
+}
+
+.dial-card small {
+  min-height: 0.72rem;
+  color: #d8d0ff;
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .dial {

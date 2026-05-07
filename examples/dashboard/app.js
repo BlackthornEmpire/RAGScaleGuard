@@ -63,6 +63,14 @@ const retrievers = {
   rerank: { label: "Hybrid rerank", recall: 0.82, precision: 0.7, citation: 0.74, densityPenalty: 0.09 },
 };
 
+const scenarioPresets = {
+  deadline: { corpusSize: "95", topK: "8", signalLevel: 4 },
+  decision: { corpusSize: "120", topK: "9", signalLevel: 4 },
+  spec: { corpusSize: "70", topK: "7", signalLevel: 3 },
+  customer: { corpusSize: "140", topK: "10", signalLevel: 4 },
+  conflict: { corpusSize: "180", topK: "12", signalLevel: 4 },
+};
+
 const controls = {
   queryType: document.querySelector("#queryType"),
   retriever: document.querySelector("#retriever"),
@@ -93,6 +101,9 @@ const output = {
   precisionValue: document.querySelector("#precisionValue"),
   citationValue: document.querySelector("#citationValue"),
   densityValue: document.querySelector("#densityValue"),
+  knobDocsValue: document.querySelector("#knobDocsValue"),
+  knobSignalsValue: document.querySelector("#knobSignalsValue"),
+  knobTopKValue: document.querySelector("#knobTopKValue"),
   recallBar: document.querySelector("#recallBar"),
   precisionBar: document.querySelector("#precisionBar"),
   citationBar: document.querySelector("#citationBar"),
@@ -374,20 +385,46 @@ function updateKnobs(state) {
     if (!dial) return;
     if (knob.dataset.knob === "docs") {
       dial.style.setProperty("--turn", `${-58 + (state.corpusSize / 500) * 116}deg`);
+      output.knobDocsValue.textContent = `${state.corpusSize}k`;
+      knob.setAttribute("aria-label", `Adjust corpus size. Current value ${state.corpusSize}k documents.`);
     }
     if (knob.dataset.knob === "signals") {
-      const enabledSignals = [
-        controls.metadata.checked,
-        controls.authority.checked,
-        controls.freshness.checked,
-        controls.conflictGuard.checked,
-      ].filter(Boolean).length;
+      const enabledSignals = enabledSignalCount();
       dial.style.setProperty("--turn", `${-58 + (enabledSignals / 4) * 116}deg`);
+      output.knobSignalsValue.textContent = `${enabledSignals}/4`;
+      knob.setAttribute("aria-label", `Adjust scoring signals. Current value ${enabledSignals} of 4 enabled.`);
     }
     if (knob.dataset.knob === "topk") {
       dial.style.setProperty("--turn", `${-58 + (state.topK / 30) * 116}deg`);
+      output.knobTopKValue.textContent = String(state.topK);
+      knob.setAttribute("aria-label", `Adjust top-k. Current value ${state.topK}.`);
     }
   });
+}
+
+function enabledSignalCount() {
+  return [
+    controls.metadata.checked,
+    controls.authority.checked,
+    controls.freshness.checked,
+    controls.conflictGuard.checked,
+  ].filter(Boolean).length;
+}
+
+function setSignalLevel(level) {
+  const nextLevel = clamp(level, 1, 4);
+  controls.metadata.checked = nextLevel >= 1;
+  controls.authority.checked = nextLevel >= 2;
+  controls.freshness.checked = nextLevel >= 3;
+  controls.conflictGuard.checked = nextLevel >= 4;
+}
+
+function applyScenarioPreset(scenarioKey) {
+  const preset = scenarioPresets[scenarioKey];
+  if (!preset) return;
+  controls.corpusSize.value = preset.corpusSize;
+  controls.topK.value = preset.topK;
+  setSignalLevel(preset.signalLevel);
 }
 
 function handleKnobPress(event) {
@@ -397,10 +434,8 @@ function handleKnobPress(event) {
     controls.corpusSize.value = current >= 500 ? "5" : String(Math.min(500, current + 55));
   }
   if (knob === "signals") {
-    const nextValue = !(controls.metadata.checked && controls.authority.checked && controls.freshness.checked);
-    controls.metadata.checked = nextValue;
-    controls.authority.checked = nextValue;
-    controls.freshness.checked = nextValue;
+    const nextLevel = enabledSignalCount() >= 4 ? 1 : enabledSignalCount() + 1;
+    setSignalLevel(nextLevel);
   }
   if (knob === "topk") {
     const current = Number.parseInt(controls.topK.value, 10);
@@ -913,12 +948,7 @@ function resetControls() {
   progressIndex = 0;
   controls.queryType.value = "deadline";
   controls.retriever.value = "rerank";
-  controls.corpusSize.value = "80";
-  controls.topK.value = "8";
-  controls.metadata.checked = true;
-  controls.authority.checked = true;
-  controls.freshness.checked = true;
-  controls.conflictGuard.checked = true;
+  applyScenarioPreset("deadline");
   controls.adviserMode.value = "off";
   recordLog("info", "Controls reset to the default profile.");
   updateAdviserMode();
@@ -1109,7 +1139,6 @@ window.addEventListener("unhandledrejection", (event) => {
 });
 
 [
-  controls.queryType,
   controls.retriever,
   controls.corpusSize,
   controls.topK,
@@ -1121,6 +1150,11 @@ window.addEventListener("unhandledrejection", (event) => {
   control.addEventListener("input", render);
 });
 
+controls.queryType.addEventListener("input", () => {
+  applyScenarioPreset(controls.queryType.value);
+  recordLog("info", "Scenario preset updated the stack controls.", { scenario: controls.queryType.value });
+  render();
+});
 controls.resetControls.addEventListener("click", resetControls);
 controls.runComparison.addEventListener("click", runComparison);
 controls.stopSimulation.addEventListener("click", stopSimulation);
@@ -1168,6 +1202,7 @@ if (window.ResizeObserver) {
   connectorObserver.observe(output.simulationCanvas);
 }
 
+applyScenarioPreset(controls.queryType.value);
 recordLog("info", "Dashboard loaded with local sample state.");
 updateAdviserMode();
 updateViewMode();

@@ -57,6 +57,9 @@ def test_dashboard_has_operational_control_sections() -> None:
         "runAdviser",
         "adviserProblem",
         "infoTooltip",
+        "knobDocsValue",
+        "knobSignalsValue",
+        "knobTopKValue",
     ]
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
@@ -64,6 +67,9 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "Summary and Recommendations" in html
     assert "Full details" in html
     assert "data-knob" in html
+    assert "Docs" in html
+    assert "Signals" in html
+    assert "Top-k" in html
     assert "data-fallback" in html
     assert "source-mark" in html
     assert "M5.042 15.165" in html
@@ -87,6 +93,9 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert "summaryRecommendations" in script
     assert "updateViewMode" in script
     assert "handleKnobPress" in script
+    assert "applyScenarioPreset" in script
+    assert "scenarioPresets" in script
+    assert "enabledSignalCount" in script
     assert "function stopSimulation" in script
     assert "function showInfoTooltip" in script
     assert "function positionInfoTooltip" in script
@@ -96,6 +105,7 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert ".console-mode .dashboard-grid" in styles
     assert ".source-mark" in styles
     assert ".stage-icon" in styles
+    assert ".dial-card small" in styles
     assert ".info-tooltip" in styles
     assert ".palette-control .info-button" in styles
     assert ".flow-path.error" in styles

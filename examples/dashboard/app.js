@@ -98,9 +98,23 @@ const output = {
   reviewItems: document.querySelector("#reviewItems"),
   evidencePolicy: document.querySelector("#evidencePolicy"),
   eventLog: document.querySelector("#eventLog"),
+  progressState: document.querySelector("#progressState"),
+  progressBar: document.querySelector("#progressBar"),
+  progressSteps: document.querySelector("#progressSteps"),
 };
 
 const logItems = ["Dashboard loaded with local sample state."];
+let progressIndex = 0;
+let progressTimer = 0;
+let hasRun = false;
+
+const progressSteps = [
+  ["Read query", "Parse the request and any constraints."],
+  ["Retrieve", "Collect dense, lexical, and hybrid candidates."],
+  ["Rerank", "Apply metadata, authority, and freshness signals."],
+  ["Check conflicts", "Flag contradictory evidence before generation."],
+  ["Report", "Update metrics, evidence, and review actions."],
+];
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -228,6 +242,31 @@ function updateEventLog() {
   });
 }
 
+function updateProgressWindow() {
+  output.progressSteps.replaceChildren();
+  progressSteps.forEach(([title, body], index) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    strong.textContent = title;
+    span.textContent = body;
+    if (index < progressIndex) {
+      li.className = "done";
+    } else if (index === progressIndex) {
+      li.className = "active";
+    }
+    li.append(strong, span);
+    output.progressSteps.append(li);
+  });
+  const percent = progressIndex / progressSteps.length;
+  output.progressBar.style.width = percentage(percent);
+  if (!hasRun) {
+    output.progressState.textContent = "Idle";
+  } else {
+    output.progressState.textContent = progressIndex >= progressSteps.length ? "Complete" : "Running";
+  }
+}
+
 function updateDiagnostics(state) {
   const topKStress = state.topK < 5 && state.densityRisk > 0.55;
   const conflictRisk = state.scenario.conflict > 0.5 && !controls.conflictGuard.checked;
@@ -274,9 +313,13 @@ function render() {
   updateReviewQueue(state);
   updateConfigSummary(state);
   updateEventLog();
+  updateProgressWindow();
 }
 
 function resetControls() {
+  window.clearInterval(progressTimer);
+  hasRun = false;
+  progressIndex = 0;
   controls.queryType.value = "deadline";
   controls.retriever.value = "rerank";
   controls.corpusSize.value = "80";
@@ -291,10 +334,22 @@ function resetControls() {
 
 function runComparison() {
   const state = calculateState();
+  window.clearInterval(progressTimer);
+  hasRun = true;
+  progressIndex = 0;
   logItems.push(
     `Compared ${state.retriever.label} on ${state.scenario.label.toLowerCase()} at ${state.corpusSize}k corpus.`,
   );
   render();
+  progressTimer = window.setInterval(() => {
+    progressIndex += 1;
+    if (progressIndex >= progressSteps.length) {
+      window.clearInterval(progressTimer);
+      progressIndex = progressSteps.length;
+      logItems.push("Run completed and review actions updated.");
+    }
+    render();
+  }, 520);
 }
 
 [

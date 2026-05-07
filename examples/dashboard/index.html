@@ -17,8 +17,8 @@
         <div>
           <h1 id="page-title">RAGScaleGuard</h1>
           <p>
-            Explore how retrieval settings affect recall, precision, citation quality,
-            neighbourhood density, and conflict handling.
+            Run a local retrieval simulation and watch each hardening step update
+            the result.
           </p>
         </div>
         <div class="run-card" aria-label="Current run summary">
@@ -28,29 +28,13 @@
         </div>
       </section>
 
-      <section class="status-strip" aria-label="System status">
-        <article>
-          <span class="label">Mode</span>
-          <strong>Local only</strong>
-        </article>
-        <article>
-          <span class="label">Network</span>
-          <strong>No calls</strong>
-        </article>
-        <article>
-          <span class="label">Review queue</span>
-          <strong id="reviewCount">2 items</strong>
-        </article>
-        <article>
-          <span class="label">Last run</span>
-          <strong id="lastRun">Not started</strong>
-        </article>
-      </section>
+      <section class="panel quick-start" aria-labelledby="controls-title">
+        <div>
+          <h2 id="controls-title">Run setup</h2>
+          <p>Pick the scenario, choose the retriever, then run the comparison.</p>
+        </div>
 
-      <section class="dashboard-grid" aria-label="Dashboard controls and results">
-        <aside class="panel controls" aria-labelledby="controls-title">
-          <h2 id="controls-title">Controls</h2>
-
+        <div class="control-set">
           <label for="queryType">Question type</label>
           <select id="queryType">
             <option value="deadline">Specific deadline</option>
@@ -59,7 +43,9 @@
             <option value="customer">Customer request</option>
             <option value="conflict">Conflicting facts</option>
           </select>
+        </div>
 
+        <div class="control-set">
           <label for="retriever">Retriever</label>
           <select id="retriever">
             <option value="dense">Dense only</option>
@@ -67,31 +53,41 @@
             <option value="hybrid">Hybrid</option>
             <option value="rerank" selected>Hybrid rerank</option>
           </select>
+        </div>
 
+        <div class="control-set">
           <div class="range-row">
             <label for="corpusSize">Corpus size</label>
             <output id="corpusSizeValue" for="corpusSize">80k</output>
           </div>
           <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
+        </div>
 
+        <div class="control-set compact">
           <div class="range-row">
             <label for="topK">Top-k</label>
             <output id="topKValue" for="topK">8</output>
           </div>
           <input id="topK" type="range" min="1" max="30" step="1" value="8">
+        </div>
 
-          <div class="toggle-list" aria-label="Hardening signals">
-            <label><input id="metadata" type="checkbox" checked> Metadata scoring</label>
-            <label><input id="authority" type="checkbox" checked> Authority scoring</label>
-            <label><input id="freshness" type="checkbox" checked> Freshness scoring</label>
-            <label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label>
-          </div>
+        <div class="action-row" aria-label="Run actions">
+          <button id="runComparison" type="button">Run comparison</button>
+          <button id="resetControls" type="button">Reset</button>
+        </div>
+      </section>
 
-          <div class="action-row" aria-label="Run actions">
-            <button id="runComparison" type="button">Run comparison</button>
-            <button id="resetControls" type="button">Reset</button>
+      <section class="dashboard-grid" aria-label="Dashboard controls and results">
+        <section class="panel progress-panel" aria-labelledby="progress-title">
+          <div class="panel-heading">
+            <h2 id="progress-title">Live progress</h2>
+            <span id="progressState">Idle</span>
           </div>
-        </aside>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progressBar"></span>
+          </div>
+          <ol id="progressSteps" class="progress-window" aria-live="polite"></ol>
+        </section>
 
         <section class="panel metrics" aria-labelledby="metrics-title">
           <h2 id="metrics-title">Retrieval quality</h2>
@@ -120,7 +116,7 @@
         </section>
 
         <section class="panel diagnostics" aria-labelledby="diagnostics-title">
-          <h2 id="diagnostics-title">Diagnostics</h2>
+          <h2 id="diagnostics-title">What to do next</h2>
           <dl>
             <div>
               <dt>Top-k status</dt>
@@ -154,33 +150,31 @@
           </div>
         </section>
 
-        <section class="panel review" aria-labelledby="review-title">
-          <h2 id="review-title">Review queue</h2>
-          <ul id="reviewItems"></ul>
-        </section>
-
-        <section class="panel config" aria-labelledby="config-title">
-          <h2 id="config-title">Configuration</h2>
-          <dl>
-            <div>
-              <dt>Evidence policy</dt>
-              <dd id="evidencePolicy">Cite top candidate and flag conflicts</dd>
-            </div>
-            <div>
-              <dt>Report output</dt>
-              <dd>Markdown and JSON</dd>
-            </div>
-            <div>
-              <dt>Data boundary</dt>
-              <dd>Browser-local sample state</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="panel log" aria-labelledby="log-title">
-          <h2 id="log-title">Event log</h2>
-          <ol id="eventLog"></ol>
-        </section>
+        <details class="panel advanced-panel">
+          <summary>Advanced controls and review</summary>
+          <div class="advanced-grid">
+            <section aria-label="Hardening signals">
+              <h3>Hardening signals</h3>
+              <div class="toggle-list">
+                <label><input id="metadata" type="checkbox" checked> Metadata scoring</label>
+                <label><input id="authority" type="checkbox" checked> Authority scoring</label>
+                <label><input id="freshness" type="checkbox" checked> Freshness scoring</label>
+                <label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label>
+              </div>
+            </section>
+            <section aria-labelledby="review-title">
+              <h3 id="review-title">Review queue</h3>
+              <p><strong id="reviewCount">1 item</strong></p>
+              <ul id="reviewItems"></ul>
+            </section>
+            <section aria-labelledby="log-title">
+              <h3 id="log-title">Event log</h3>
+              <p id="lastRun">Not started</p>
+              <p id="evidencePolicy">Cite top candidate and flag conflicts</p>
+              <ol id="eventLog"></ol>
+            </section>
+          </div>
+        </details>
       </section>
     </main>
   </body>

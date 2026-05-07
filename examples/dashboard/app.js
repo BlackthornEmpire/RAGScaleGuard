@@ -448,7 +448,7 @@ function updateSimulationCanvas(state) {
       node.classList.add(severity);
     }
     if (icon && stageSymbols.has(stage)) {
-      icon.textContent = hasRun && severity === "error" && stage <= activeStage ? "×" : stageSymbols.get(stage);
+      icon.dataset.symbol = stageSymbols.get(stage);
     }
   });
 

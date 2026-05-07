@@ -359,11 +359,6 @@ body {
   box-shadow: 0 0 16px rgba(126, 229, 221, 0.16);
 }
 
-.source-dot strong {
-  color: #7ef0df;
-  font-size: 0.78rem;
-}
-
 .source-dot span {
   position: absolute;
   left: 50%;
@@ -371,6 +366,49 @@ body {
   transform: translateX(-50%);
   color: var(--ink);
   font-size: 0.58rem;
+}
+
+.source-mark {
+  width: 64%;
+  height: 64%;
+  overflow: visible;
+  filter: drop-shadow(0 0 6px rgba(126, 240, 223, 0.56));
+}
+
+.jira-mark path:first-child {
+  fill: rgba(34, 116, 184, 0.9);
+  stroke: rgba(126, 240, 223, 0.82);
+  stroke-width: 1.6;
+}
+
+.jira-mark path:last-child {
+  fill: rgba(12, 24, 54, 0.72);
+  stroke: rgba(191, 180, 255, 0.72);
+  stroke-width: 1.2;
+}
+
+.slack-mark rect:nth-child(1) {
+  fill: #31d2c7;
+}
+
+.slack-mark rect:nth-child(2) {
+  fill: #9b5cff;
+}
+
+.slack-mark rect:nth-child(3) {
+  fill: #ff4d5f;
+}
+
+.slack-mark rect:nth-child(4) {
+  fill: #ffc33d;
+}
+
+.confluence-mark {
+  fill: none;
+  stroke: #74b8ff;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .sim-stage {
@@ -390,9 +428,35 @@ body {
 }
 
 .sim-stage strong {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(126, 240, 223, 0.56);
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(126, 240, 223, 0.18), transparent 42%),
+    rgba(10, 22, 42, 0.76);
   color: #7ef0df;
-  font-size: 1.35rem;
+  box-shadow: 0 0 14px rgba(126, 240, 223, 0.26);
   line-height: 1;
+  transform: rotate(45deg);
+}
+
+.stage-icon {
+  width: 68%;
+  height: 68%;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transform: rotate(-45deg);
+}
+
+.stage-icon path:first-child {
+  stroke-width: 2.5;
 }
 
 .sim-stage span {
@@ -1931,7 +1995,9 @@ h1 {
 }
 
 .sim-stage strong {
-  font-size: clamp(1.28rem, 2.1vw, 2.25rem);
+  width: clamp(32px, 2.8vw, 52px);
+  height: clamp(32px, 2.8vw, 52px);
+  border-radius: clamp(9px, 0.8vw, 14px);
 }
 
 .sim-stage span {
@@ -1960,6 +2026,14 @@ h1 {
 .sim-stage.error strong,
 .sim-stage.error span {
   color: #ffccd1;
+}
+
+.sim-stage.error strong {
+  border-color: rgba(255, 204, 209, 0.72);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 77, 95, 0.22), transparent 44%),
+    rgba(80, 24, 42, 0.84);
+  box-shadow: 0 0 18px rgba(255, 77, 95, 0.56);
 }
 
 .sim-node.error::before,

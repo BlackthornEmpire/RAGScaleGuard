@@ -119,10 +119,38 @@
 
             <div class="source-stack" aria-label="Retrieved sources">
               <span>Sources</span>
-              <div class="source-dot jira"><strong>J</strong><span>Jira</span></div>
-              <div class="source-dot slack"><strong>S</strong><span>Slack</span></div>
-              <div class="source-dot jira-secondary"><strong>J</strong><span>Jira</span></div>
-              <div class="source-dot confluence"><strong>C</strong><span>Confluence</span></div>
+              <div class="source-dot jira">
+                <svg class="source-mark jira-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M12 3 21 12 12 21 3 12Z"></path>
+                  <path d="M12 8 16 12 12 16 8 12Z"></path>
+                </svg>
+                <span>Jira</span>
+              </div>
+              <div class="source-dot slack">
+                <svg class="source-mark slack-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="10" y="3" width="4" height="9" rx="2"></rect>
+                  <rect x="10" y="12" width="4" height="9" rx="2"></rect>
+                  <rect x="3" y="10" width="9" height="4" rx="2"></rect>
+                  <rect x="12" y="10" width="9" height="4" rx="2"></rect>
+                </svg>
+                <span>Slack</span>
+              </div>
+              <div class="source-dot jira-secondary">
+                <svg class="source-mark jira-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M12 3 21 12 12 21 3 12Z"></path>
+                  <path d="M12 8 16 12 12 16 8 12Z"></path>
+                </svg>
+                <span>Jira</span>
+              </div>
+              <div class="source-dot confluence">
+                <svg class="source-mark confluence-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M7.2 16.2 12 7.8"></path>
+                  <path d="M12 16.2 16.8 7.8"></path>
+                  <path d="M5.2 14.7c2.2 1.8 4.5 1.9 6.8.4"></path>
+                  <path d="M12 8.9c2.3-1.5 4.6-1.4 6.8.4"></path>
+                </svg>
+                <span>Confluence</span>
+              </div>
             </div>
 
             <div class="flow-line line-a"></div>
@@ -132,11 +160,61 @@
             <div class="flow-line line-e"></div>
             <div class="flow-line line-f"></div>
 
-            <div class="sim-stage normalize sim-node" data-stage="1"><strong>+</strong><span>Normalise</span></div>
-            <div class="sim-stage density sim-node" data-stage="2"><strong>▽</strong><span>Density</span></div>
-            <div class="sim-stage rerank sim-node" data-stage="3"><strong>≡</strong><span>Rerank</span></div>
-            <div class="sim-stage conflict sim-node" data-stage="4"><strong>×</strong><span>Conflict<br>Gate</span></div>
-            <div class="sim-stage validation sim-node" data-stage="5"><strong>✓</strong><span>Validation<br>Gate</span></div>
+            <div class="sim-stage normalize sim-node" data-stage="1">
+              <strong>
+                <svg class="stage-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                  <path d="M20.4 4.6 27.4 11.6 22.9 16.1 20.9 14.1 18.4 16.6 15.4 13.6 17.9 11.1 15.9 9.1Z"></path>
+                  <path d="M5.6 24.7 14.9 15.4 17.6 18.1 8.3 27.4H5.6Z"></path>
+                  <path d="M7 7.4 10 4.4 13 7.4 10 10.4Z"></path>
+                  <path d="M21.4 22 24 19.4 26.6 22 24 24.6Z"></path>
+                </svg>
+              </strong>
+              <span>Normalise</span>
+            </div>
+            <div class="sim-stage density sim-node" data-stage="2">
+              <strong>
+                <svg class="stage-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                  <path d="M5 7h22l-8.3 9.7v6.1L13.3 26v-9.3Z"></path>
+                  <path d="M9 10h14"></path>
+                  <path d="M12 13h8"></path>
+                </svg>
+              </strong>
+              <span>Density</span>
+            </div>
+            <div class="sim-stage rerank sim-node" data-stage="3">
+              <strong>
+                <svg class="stage-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                  <path d="M10 7h10"></path>
+                  <path d="M10 12h14"></path>
+                  <path d="M10 17h9"></path>
+                  <path d="M10 22h12"></path>
+                  <path d="M6 7h.1"></path>
+                  <path d="M6 12h.1"></path>
+                  <path d="M6 17h.1"></path>
+                  <path d="M6 22h.1"></path>
+                </svg>
+              </strong>
+              <span>Rerank</span>
+            </div>
+            <div class="sim-stage conflict sim-node" data-stage="4">
+              <strong>
+                <svg class="stage-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                  <path d="M16 4 25 8v7.2c0 5.6-3.8 9.9-9 12.8-5.2-2.9-9-7.2-9-12.8V8Z"></path>
+                  <path d="M12 12 20 20"></path>
+                  <path d="M20 12 12 20"></path>
+                </svg>
+              </strong>
+              <span>Conflict<br>Gate</span>
+            </div>
+            <div class="sim-stage validation sim-node" data-stage="5">
+              <strong>
+                <svg class="stage-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                  <path d="M16 4 25 8v7.2c0 5.6-3.8 9.9-9 12.8-5.2-2.9-9-7.2-9-12.8V8Z"></path>
+                  <path d="M10.5 16.2 14.3 20 22 11.8"></path>
+                </svg>
+              </strong>
+              <span>Validation<br>Gate</span>
+            </div>
             <div class="document-stack" aria-label="Approved context">
               <div></div><div></div><div></div><div></div>
             </div>

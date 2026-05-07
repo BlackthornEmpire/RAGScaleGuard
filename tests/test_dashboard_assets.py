@@ -62,6 +62,8 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "Summary and Recommendations" in html
     assert "Full details" in html
     assert "data-knob" in html
+    assert "source-mark" in html
+    assert "stage-icon" in html
     assert "palette-info" in html
     assert "palette-control" in html
     assert "Status colours" in html
@@ -83,6 +85,8 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert ".diagnostics.error" in styles
     assert ".summary-panel.error" in styles
     assert ".console-mode .dashboard-grid" in styles
+    assert ".source-mark" in styles
+    assert ".stage-icon" in styles
     assert ".flow-path.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles

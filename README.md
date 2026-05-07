@@ -12,7 +12,7 @@ It is a practical framework for comparing retrieval strategies, finding why top-
 - Detects simple factual conflicts across retrieved evidence.
 - Diagnoses cases where the answer document exists but was pushed out of top-k.
 - Produces JSON and Markdown evaluation reports.
-- Redacts common secrets and escapes dataset-controlled fields in reports.
+- Redacts common secrets and escapes corpus-controlled fields in reports.
 - Provides deterministic unit tests and extension points for real embeddings, vector stores, and rerankers.
 
 ## Install
@@ -30,15 +30,15 @@ pytest
 python examples/minimal_local_demo.py
 ```
 
-## EnterpriseRAG-Bench
+## Local Corpus Evaluation
 
-RAGScaleGuard is designed to run against datasets such as `onyx-dot-app/EnterpriseRAG-Bench`. The first release includes an adapter-style example that expects local JSONL/parquet-exported documents and questions. It does not bundle benchmark data.
+RAGScaleGuard can evaluate any local enterprise-style corpus represented as JSONL documents and questions. It does not bundle or require external corpora.
 
 ```bash
-python examples/run_enterpriserag_bench.py \
+python examples/run_local_corpus.py \
   --documents /path/to/documents.jsonl \
   --questions /path/to/questions.jsonl \
-  --report reports/enterpriserag-bench.md
+  --report reports/local-corpus.md
 ```
 
 Expected document fields are `id`, `text`, and optional `source_type`, `created_at`, `updated_at`, `author`, `project`, `customer`, `ticket_id`, `department`, `status`, and `is_verified`.

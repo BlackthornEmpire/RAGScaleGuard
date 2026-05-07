@@ -7,7 +7,7 @@ from ragscaleguard.evaluation.reports import to_json, to_markdown
 from ragscaleguard.evaluation.runner import EvaluationRun
 
 
-def test_markdown_report_escapes_dataset_controlled_values() -> None:
+def test_markdown_report_escapes_corpus_controlled_values() -> None:
     run = EvaluationRun(
         name="eval [link](https://example.com)",
         metrics=RetrievalMetrics(0.0, 0.0, 0.0, 1),

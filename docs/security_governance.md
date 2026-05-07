@@ -4,7 +4,7 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 
 ## Data Handling Requirements
 
-- Keep raw benchmark and enterprise corpora in `data/`, which is ignored by git.
+- Keep raw enterprise corpora in `data/`, which is ignored by git.
 - Keep generated reports in `reports/`, which is ignored by git.
 - Do not log raw document text in CI.
 - Redact reports before sharing outside the authorised team.
@@ -17,12 +17,12 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 - Metadata-aware constraints: project, customer, source type, date, owner, and department should be usable as retrieval signals.
 - Conflict detection: contradictory evidence should be surfaced rather than hidden behind a single generated answer.
 - Auditability: reports should show which retrieval strategy produced which evidence set.
-- Benchmark integrity: EnterpriseRAG-Bench data must not be used for model training.
+- Evaluation integrity: held-out evaluation data must not be used for model training.
 
 ## Enterprise Deployment Checklist
 
 - Run evaluations inside a controlled working directory or container.
 - Pin dependencies and run `pytest`, `mypy`, and `ruff` in CI.
 - Decide whether hosted rerankers or answer evaluators are allowed to receive document text.
-- Record benchmark dataset version, corpus size, retriever settings, embedding model, reranker model, and top-k.
-- Review report artefacts before publishing leaderboards or case studies.
+- Record corpus version, corpus size, retriever settings, embedding model, reranker model, and top-k.
+- Review report artefacts before publishing external summaries or case studies.

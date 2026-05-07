@@ -72,6 +72,8 @@ const controls = {
   authority: document.querySelector("#authority"),
   freshness: document.querySelector("#freshness"),
   conflictGuard: document.querySelector("#conflictGuard"),
+  runComparison: document.querySelector("#runComparison"),
+  resetControls: document.querySelector("#resetControls"),
 };
 
 const output = {
@@ -91,7 +93,14 @@ const output = {
   conflictStatus: document.querySelector("#conflictStatus"),
   recommendation: document.querySelector("#recommendation"),
   candidateRows: document.querySelector("#candidateRows"),
+  reviewCount: document.querySelector("#reviewCount"),
+  lastRun: document.querySelector("#lastRun"),
+  reviewItems: document.querySelector("#reviewItems"),
+  evidencePolicy: document.querySelector("#evidencePolicy"),
+  eventLog: document.querySelector("#eventLog"),
 };
+
+const logItems = ["Dashboard loaded with local sample state."];
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -167,6 +176,58 @@ function updateRows(state) {
   });
 }
 
+function reviewQueue(state) {
+  const items = [];
+  if (state.densityRisk > 0.7) {
+    items.push(["High density", "Increase candidate depth or strengthen reranking before generation."]);
+  }
+  if (state.scenario.conflict > 0.5) {
+    items.push(["Conflicting evidence", "Compare final-source evidence before accepting an answer."]);
+  }
+  if (state.precision < 0.5) {
+    items.push(["Low precision", "Candidate set may include too much related but incomplete evidence."]);
+  }
+  if (items.length === 0) {
+    items.push(["No blocking review", "Current settings are suitable for the selected scenario."]);
+  }
+  return items;
+}
+
+function updateReviewQueue(state) {
+  const items = reviewQueue(state);
+  output.reviewCount.textContent = `${items.length} ${items.length === 1 ? "item" : "items"}`;
+  output.reviewItems.replaceChildren();
+  items.forEach(([title, body]) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    strong.textContent = title;
+    span.textContent = body;
+    li.append(strong, span);
+    output.reviewItems.append(li);
+  });
+}
+
+function updateConfigSummary(state) {
+  output.evidencePolicy.textContent = controls.conflictGuard.checked
+    ? "Cite top candidate and flag conflicts"
+    : "Cite top candidate without conflict blocking";
+  output.lastRun.textContent = `${state.retriever.label}, top-k ${state.topK}`;
+}
+
+function updateEventLog() {
+  output.eventLog.replaceChildren();
+  logItems.slice(-5).forEach((entry) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    strong.textContent = "Local event";
+    span.textContent = entry;
+    li.append(strong, span);
+    output.eventLog.prepend(li);
+  });
+}
+
 function updateDiagnostics(state) {
   const topKStress = state.topK < 5 && state.densityRisk > 0.55;
   const conflictRisk = state.scenario.conflict > 0.5 && !controls.conflictGuard.checked;
@@ -210,11 +271,46 @@ function render() {
 
   updateDiagnostics(state);
   updateRows(state);
+  updateReviewQueue(state);
+  updateConfigSummary(state);
+  updateEventLog();
 }
 
-Object.values(controls).forEach((control) => {
+function resetControls() {
+  controls.queryType.value = "deadline";
+  controls.retriever.value = "rerank";
+  controls.corpusSize.value = "80";
+  controls.topK.value = "8";
+  controls.metadata.checked = true;
+  controls.authority.checked = true;
+  controls.freshness.checked = true;
+  controls.conflictGuard.checked = true;
+  logItems.push("Controls reset to the default profile.");
+  render();
+}
+
+function runComparison() {
+  const state = calculateState();
+  logItems.push(
+    `Compared ${state.retriever.label} on ${state.scenario.label.toLowerCase()} at ${state.corpusSize}k corpus.`,
+  );
+  render();
+}
+
+[
+  controls.queryType,
+  controls.retriever,
+  controls.corpusSize,
+  controls.topK,
+  controls.metadata,
+  controls.authority,
+  controls.freshness,
+  controls.conflictGuard,
+].forEach((control) => {
   control.addEventListener("input", render);
 });
 
-render();
+controls.resetControls.addEventListener("click", resetControls);
+controls.runComparison.addEventListener("click", runComparison);
 
+render();

@@ -34,7 +34,7 @@ select {
 .app-shell {
   width: min(1180px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 34px 0;
+  padding: 24px 0;
 }
 
 .hero {
@@ -42,7 +42,7 @@ select {
   grid-template-columns: minmax(0, 1fr) 300px;
   gap: 24px;
   align-items: stretch;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 h1,
@@ -52,7 +52,7 @@ p {
 }
 
 h1 {
-  font-size: clamp(2rem, 4vw, 4.25rem);
+  font-size: clamp(2rem, 3.5vw, 3.7rem);
   line-height: 0.95;
   letter-spacing: 0;
 }
@@ -64,7 +64,7 @@ h2 {
 
 .hero p {
   max-width: 730px;
-  margin-top: 18px;
+  margin-top: 12px;
   color: var(--muted);
   font-size: 1.05rem;
   line-height: 1.6;
@@ -80,7 +80,7 @@ h2 {
 
 .run-card {
   display: flex;
-  min-height: 148px;
+  min-height: 124px;
   flex-direction: column;
   justify-content: center;
   padding: 22px;
@@ -107,14 +107,34 @@ dt {
   line-height: 1.45;
 }
 
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.status-strip article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  padding: 12px 14px;
+}
+
+.status-strip strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1rem;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: 310px repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .panel {
-  padding: 20px;
+  padding: 18px;
 }
 
 .controls {
@@ -126,7 +146,7 @@ dt {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 14px;
   color: var(--ink);
   font-size: 0.9rem;
   font-weight: 650;
@@ -134,7 +154,7 @@ dt {
 
 select {
   width: 100%;
-  height: 42px;
+  height: 40px;
   margin-top: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -152,8 +172,8 @@ input[type="range"] {
 .toggle-list {
   display: grid;
   gap: 10px;
-  margin-top: 22px;
-  padding-top: 18px;
+  margin-top: 18px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
 }
 
@@ -170,20 +190,50 @@ input[type="range"] {
   accent-color: var(--accent);
 }
 
+.action-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+button {
+  min-height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--ink);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+button + button {
+  background: #fff;
+  color: var(--ink);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(40, 95, 147, 0.28);
+  outline-offset: 2px;
+}
+
 .metrics,
 .diagnostics {
-  min-height: 255px;
+  min-height: 230px;
 }
 
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 14px;
 }
 
 .metric-grid article {
-  min-height: 96px;
+  min-height: 86px;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 14px;
@@ -192,7 +242,7 @@ input[type="range"] {
 
 .metric-grid strong {
   display: block;
-  margin-top: 12px;
+  margin-top: 8px;
   font-size: 1.45rem;
 }
 
@@ -220,7 +270,7 @@ input[type="range"] {
 dl {
   display: grid;
   gap: 16px;
-  margin: 18px 0 0;
+  margin: 14px 0 0;
 }
 
 dl div {
@@ -236,6 +286,38 @@ dd {
 
 .results {
   grid-column: span 2;
+}
+
+.review,
+.config,
+.log {
+  min-height: 190px;
+}
+
+.review ul,
+.log ol {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review li,
+.log li {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfd;
+  padding: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.review strong,
+.log strong {
+  display: block;
+  color: var(--ink);
+  margin-bottom: 4px;
 }
 
 .table-wrap {
@@ -271,6 +353,7 @@ td:last-child {
 
 @media (max-width: 900px) {
   .hero,
+  .status-strip,
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
@@ -279,6 +362,12 @@ td:last-child {
   .results {
     grid-column: auto;
     grid-row: auto;
+  }
+
+  .review,
+  .config,
+  .log {
+    grid-column: auto;
   }
 }
 
@@ -297,4 +386,3 @@ td:last-child {
     padding: 16px;
   }
 }
-

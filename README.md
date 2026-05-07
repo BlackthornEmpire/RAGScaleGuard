@@ -34,6 +34,12 @@ python examples/minimal_local_demo.py
 
 Open `examples/dashboard/index.html` in a browser to try a local interactive dashboard. It uses static sample values, local JavaScript, and no external network calls.
 
+To serve it locally:
+
+```bash
+python examples/serve_dashboard.py
+```
+
 ## Local Corpus Evaluation
 
 RAGScaleGuard can evaluate any local enterprise-style corpus represented as JSONL documents and questions. It does not bundle or require external corpora.

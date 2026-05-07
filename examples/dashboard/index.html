@@ -28,6 +28,25 @@
         </div>
       </section>
 
+      <section class="status-strip" aria-label="System status">
+        <article>
+          <span class="label">Mode</span>
+          <strong>Local only</strong>
+        </article>
+        <article>
+          <span class="label">Network</span>
+          <strong>No calls</strong>
+        </article>
+        <article>
+          <span class="label">Review queue</span>
+          <strong id="reviewCount">2 items</strong>
+        </article>
+        <article>
+          <span class="label">Last run</span>
+          <strong id="lastRun">Not started</strong>
+        </article>
+      </section>
+
       <section class="dashboard-grid" aria-label="Dashboard controls and results">
         <aside class="panel controls" aria-labelledby="controls-title">
           <h2 id="controls-title">Controls</h2>
@@ -66,6 +85,11 @@
             <label><input id="authority" type="checkbox" checked> Authority scoring</label>
             <label><input id="freshness" type="checkbox" checked> Freshness scoring</label>
             <label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label>
+          </div>
+
+          <div class="action-row" aria-label="Run actions">
+            <button id="runComparison" type="button">Run comparison</button>
+            <button id="resetControls" type="button">Reset</button>
           </div>
         </aside>
 
@@ -129,8 +153,35 @@
             </table>
           </div>
         </section>
+
+        <section class="panel review" aria-labelledby="review-title">
+          <h2 id="review-title">Review queue</h2>
+          <ul id="reviewItems"></ul>
+        </section>
+
+        <section class="panel config" aria-labelledby="config-title">
+          <h2 id="config-title">Configuration</h2>
+          <dl>
+            <div>
+              <dt>Evidence policy</dt>
+              <dd id="evidencePolicy">Cite top candidate and flag conflicts</dd>
+            </div>
+            <div>
+              <dt>Report output</dt>
+              <dd>Markdown and JSON</dd>
+            </div>
+            <div>
+              <dt>Data boundary</dt>
+              <dd>Browser-local sample state</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel log" aria-labelledby="log-title">
+          <h2 id="log-title">Event log</h2>
+          <ol id="eventLog"></ol>
+        </section>
       </section>
     </main>
   </body>
 </html>
-

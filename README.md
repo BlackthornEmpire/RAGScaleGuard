@@ -30,6 +30,33 @@ pytest
 python examples/minimal_local_demo.py
 ```
 
+## Plug Into Existing RAG Pipelines
+
+Use `guard_retrieval` when your system already has retrieved candidates:
+
+```python
+from ragscaleguard import guard_retrieval
+
+results = retriever.search("What changed in the rollout plan?", top_k=12)
+decision = guard_retrieval("What changed in the rollout plan?", results)
+
+if decision.should_block_generation:
+    raise RuntimeError("Retrieval is not safe enough for generation")
+
+answer = llm.generate(context="\n\n".join(decision.approved_context))
+```
+
+For retrievers that return dictionaries or document objects, wrap them with `GuardedRetriever`:
+
+```python
+from ragscaleguard.adapters import GuardedRetriever
+
+guarded = GuardedRetriever(existing_retriever)
+decision = guarded.search("What is the approved deadline?", top_k=10)
+```
+
+The guard returns pipeline stages, blocking issues, approved context, and fix suggestions. A custom suggestion provider can be attached when teams want model-generated remediation advice.
+
 ## Dashboard Demo
 
 Open `examples/dashboard/index.html` in a browser to try a local interactive dashboard. It uses static sample values, local JavaScript, and no external network calls.

@@ -85,6 +85,7 @@ h3 {
 
 .panel,
 .run-card {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: linear-gradient(180deg, rgba(25, 21, 41, 0.96), rgba(15, 12, 25, 0.96));
@@ -199,11 +200,16 @@ summary:focus-visible {
   gap: 14px;
 }
 
+.dashboard-grid > * {
+  min-width: 0;
+}
+
 .panel {
   padding: 18px;
 }
 
 .progress-panel,
+.pipeline-panel,
 .results,
 .advanced-panel {
   grid-column: 1 / -1;
@@ -287,6 +293,157 @@ summary:focus-visible {
 
 .progress-window .error strong {
   color: #ffb4bb;
+}
+
+.pipeline-panel .panel-heading p {
+  max-width: 680px;
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.pipeline-graph {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pipeline-node {
+  position: relative;
+  min-height: 116px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b0813;
+  padding: 12px;
+}
+
+.pipeline-node:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 10px;
+  height: 1px;
+  background: var(--line);
+}
+
+.pipeline-node strong,
+.bottleneck-list strong,
+.suggestion-list strong {
+  display: block;
+  color: var(--ink);
+}
+
+.pipeline-node span {
+  display: inline-block;
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pipeline-node p {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.pipeline-node.active {
+  border-color: var(--accent-2);
+  box-shadow: inset 0 0 0 1px rgba(192, 132, 252, 0.2);
+}
+
+.pipeline-node.warn {
+  border-color: var(--warn);
+}
+
+.pipeline-node.error {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+
+.pipeline-node.error strong {
+  color: #ffccd1;
+}
+
+.pipeline-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.05fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.bottleneck-list,
+.suggestion-list {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bottleneck-list li,
+.suggestion-list li,
+.adapter-output {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0b0813;
+  color: var(--muted);
+}
+
+.bottleneck-list li,
+.suggestion-list li {
+  padding: 11px;
+  line-height: 1.4;
+}
+
+.bottleneck-list li.warn,
+.suggestion-list li.warn {
+  border-color: var(--warn);
+}
+
+.bottleneck-list li.error,
+.suggestion-list li.error {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+
+.bottleneck-meter {
+  overflow: hidden;
+  height: 7px;
+  margin-top: 9px;
+  border-radius: 999px;
+  background: #241b36;
+}
+
+.bottleneck-meter span {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-2);
+}
+
+.warn .bottleneck-meter span {
+  background: var(--warn);
+}
+
+.error .bottleneck-meter span {
+  background: var(--bad);
+}
+
+.adapter-output {
+  min-height: 154px;
+  margin: 12px 0 0;
+  overflow-x: auto;
+  padding: 12px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
 }
 
 .metric-grid {
@@ -487,8 +644,19 @@ summary {
   .hero,
   .quick-start,
   .dashboard-grid,
+  .pipeline-graph,
+  .pipeline-detail-grid,
   .advanced-grid {
     grid-template-columns: 1fr;
+  }
+
+  .pipeline-node:not(:last-child)::after {
+    top: auto;
+    right: auto;
+    bottom: -10px;
+    left: 20px;
+    width: 1px;
+    height: 10px;
   }
 
   .progress-window {

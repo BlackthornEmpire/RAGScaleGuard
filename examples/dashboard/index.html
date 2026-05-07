@@ -89,6 +89,31 @@
           <ol id="progressSteps" class="progress-window" aria-live="polite"></ol>
         </section>
 
+        <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="pipeline-title">Full pipeline view</h2>
+              <p>Trace the guard from the existing app through retrieval, diagnosis, LLM gating and logging.</p>
+            </div>
+            <span id="pipelineHealth">Ready</span>
+          </div>
+          <div id="pipelineGraph" class="pipeline-graph" aria-live="polite"></div>
+          <div class="pipeline-detail-grid">
+            <section aria-labelledby="bottleneck-title">
+              <h3 id="bottleneck-title">Bottlenecks</h3>
+              <ul id="bottleneckList" class="bottleneck-list"></ul>
+            </section>
+            <section aria-labelledby="fix-title">
+              <h3 id="fix-title">Fix suggestions</h3>
+              <ul id="fixSuggestions" class="suggestion-list"></ul>
+            </section>
+            <section aria-labelledby="adapter-title">
+              <h3 id="adapter-title">Adapter output</h3>
+              <pre id="adapterOutput" class="adapter-output"></pre>
+            </section>
+          </div>
+        </section>
+
         <section class="panel metrics" aria-labelledby="metrics-title">
           <h2 id="metrics-title">Retrieval quality</h2>
           <div class="metric-grid">

@@ -42,6 +42,10 @@ def test_dashboard_has_operational_control_sections() -> None:
         "lastRun",
         "diagnosticsPanel",
         "progressSteps",
+        "pipelineGraph",
+        "bottleneckList",
+        "fixSuggestions",
+        "adapterOutput",
     ]
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
@@ -58,6 +62,19 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert ".diagnostics.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles
+
+
+def test_dashboard_has_full_pipeline_visualisation() -> None:
+    script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
+    styles = (DASHBOARD_DIR / "styles.css").read_text(encoding="utf-8")
+
+    assert "pipelineStages" in script
+    assert "bottlenecks" in script
+    assert "fixSuggestions" in script
+    assert "GuardedRetriever(existing_retriever)" in script
+    assert ".pipeline-graph" in styles
+    assert ".pipeline-node.error" in styles
+    assert ".bottleneck-meter" in styles
 
 
 def test_dashboard_launcher_defaults_to_localhost() -> None:

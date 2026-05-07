@@ -102,6 +102,11 @@ const output = {
   progressState: document.querySelector("#progressState"),
   progressBar: document.querySelector("#progressBar"),
   progressSteps: document.querySelector("#progressSteps"),
+  pipelineHealth: document.querySelector("#pipelineHealth"),
+  pipelineGraph: document.querySelector("#pipelineGraph"),
+  bottleneckList: document.querySelector("#bottleneckList"),
+  fixSuggestions: document.querySelector("#fixSuggestions"),
+  adapterOutput: document.querySelector("#adapterOutput"),
 };
 
 const logItems = [];
@@ -110,11 +115,13 @@ let progressTimer = 0;
 let hasRun = false;
 
 const progressSteps = [
-  ["Read query", "Parse the request and any constraints."],
+  ["Adapter", "Normalise external retriever output."],
   ["Retrieve", "Collect dense, lexical, and hybrid candidates."],
+  ["Density scan", "Measure candidate crowding and near-neighbour pressure."],
   ["Rerank", "Apply metadata, authority, and freshness signals."],
-  ["Check conflicts", "Flag contradictory evidence before generation."],
-  ["Report", "Update metrics, evidence, and review actions."],
+  ["Conflict gate", "Flag contradictory evidence before generation."],
+  ["LLM gate", "Approve context or block generation."],
+  ["Telemetry", "Persist diagnostics, errors, and review actions."],
 ];
 
 function clamp(value, min, max) {
@@ -292,6 +299,7 @@ function updateEventLog() {
 
 function updateProgressWindow() {
   const state = calculateState();
+  const stages = pipelineStages(state);
   output.progressSteps.replaceChildren();
   progressSteps.forEach(([title, body], index) => {
     const li = document.createElement("li");
@@ -304,14 +312,12 @@ function updateProgressWindow() {
     } else if (index === progressIndex) {
       li.className = "active";
     }
-    if (
-      state.severity === "error" &&
-      ((state.conflictRisk && title === "Check conflicts") ||
-        (state.densityRisk > 0.78 && title === "Retrieve"))
-    ) {
-      li.className = index <= progressIndex || progressIndex >= progressSteps.length ? "error" : li.className;
-    } else if (state.severity === "warn" && title === "Rerank") {
-      li.className = index <= progressIndex || progressIndex >= progressSteps.length ? "warn" : li.className;
+    const pipelineStage = stages.find((stage) => stage.title === title);
+    if (pipelineStage && pipelineStage.severity !== "ok") {
+      li.className =
+        index <= progressIndex || progressIndex >= progressSteps.length
+          ? pipelineStage.severity
+          : li.className;
     }
     li.append(strong, span);
     output.progressSteps.append(li);
@@ -324,6 +330,160 @@ function updateProgressWindow() {
   } else {
     output.progressState.textContent = progressIndex >= progressSteps.length ? "Complete" : "Running";
   }
+}
+
+function pipelineStages(state) {
+  return [
+    {
+      title: "Adapter",
+      status: "Normalised",
+      detail: "Accepts SearchResult, document objects, or dictionaries from an existing retriever.",
+      severity: "ok",
+    },
+    {
+      title: "Retrieve",
+      status: state.densityRisk > 0.78 ? "Crowded" : "Collected",
+      detail: `${state.topK} visible candidates from ${state.retriever.label}.`,
+      severity: state.densityRisk > 0.78 ? "error" : state.densityRisk > 0.62 ? "warn" : "ok",
+    },
+    {
+      title: "Density scan",
+      status: densityLabel(state.densityRisk),
+      detail: "Checks whether related documents are competing for the same top-k slots.",
+      severity: state.densityRisk > 0.78 ? "error" : state.densityRisk > 0.62 ? "warn" : "ok",
+    },
+    {
+      title: "Rerank",
+      status: state.precisionRisk ? "Weak precision" : "Ranked",
+      detail: "Combines retrieval score, metadata, source authority, and freshness signals.",
+      severity: state.precisionRisk ? "warn" : state.densityRisk > 0.62 ? "warn" : "ok",
+    },
+    {
+      title: "Conflict gate",
+      status: state.conflictRisk ? "Blocking issue" : "Checked",
+      detail: state.conflictRisk ? "Contradictory facts would reach generation." : "No blocking contradiction.",
+      severity: state.conflictRisk ? "error" : state.scenario.conflict > 0.5 ? "warn" : "ok",
+    },
+    {
+      title: "LLM gate",
+      status: state.severity === "error" ? "Do not generate" : "Context approved",
+      detail:
+        state.severity === "error"
+          ? "Return a retrieval failure or request review before calling the model."
+          : "Approved evidence can be packaged for any model provider.",
+      severity: state.severity,
+    },
+    {
+      title: "Telemetry",
+      status: "Logged",
+      detail: "Writes local events and can be forwarded to external observability.",
+      severity: state.severity === "error" ? "warn" : "ok",
+    },
+  ];
+}
+
+function bottlenecks(state) {
+  const retrievalLoad = clamp(state.corpusSize / 500 + state.densityRisk * 0.42, 0, 1);
+  const rerankLoad = clamp((state.topK / 30) * 0.52 + state.densityRisk * 0.36, 0, 1);
+  const conflictLoad = clamp(state.scenario.conflict + (controls.conflictGuard.checked ? -0.22 : 0.12), 0, 1);
+  const contextLoad = clamp((1 - state.precision) * 0.7 + state.topK / 60, 0, 1);
+  return [
+    ["Candidate pressure", retrievalLoad, "More near-related documents are competing for top-k slots."],
+    ["Rerank work", rerankLoad, "Candidate volume and source signals increase ranking cost."],
+    ["Conflict review", conflictLoad, "Contradictory facts require review before model generation."],
+    ["Context packaging", contextLoad, "Low precision increases irrelevant context sent downstream."],
+  ];
+}
+
+function severityForLoad(value) {
+  if (value >= 0.78) return "error";
+  if (value >= 0.58) return "warn";
+  return "ok";
+}
+
+function fixSuggestions(state) {
+  const suggestions = [];
+  if (state.densityRisk > 0.72) {
+    suggestions.push(["Reduce crowding", "Increase candidate depth, add lexical retrieval, then rerank with source metadata."]);
+  }
+  if (state.conflictRisk) {
+    suggestions.push(["Block generation", "Return a conflict response until final-source evidence is selected."]);
+  }
+  if (state.precision < 0.55) {
+    suggestions.push(["Improve precision", "Lower top-k after reranking or apply authority and freshness scoring first."]);
+  }
+  if (state.severity !== "error") {
+    suggestions.push(["Safe model handoff", "Send only approved context to the model and keep citation checks active."]);
+  }
+  suggestions.push([
+    "Optional model advisor",
+    "Attach a suggestion provider to turn guard issues into remediation text for your team.",
+  ]);
+  return suggestions;
+}
+
+function updatePipelineView(state) {
+  const stages = pipelineStages(state);
+  output.pipelineHealth.textContent =
+    state.severity === "error" ? "Blocked" : state.severity === "warn" ? "Review" : "Healthy";
+  setSeverity(output.pipelineHealth, state.severity);
+  output.pipelineGraph.replaceChildren();
+  stages.forEach((stage, index) => {
+    const article = document.createElement("article");
+    const title = document.createElement("strong");
+    const status = document.createElement("span");
+    const detail = document.createElement("p");
+    title.textContent = stage.title;
+    status.textContent = stage.status;
+    detail.textContent = stage.detail;
+    article.className = `pipeline-node ${stage.severity}`;
+    if (hasRun && index === Math.min(progressIndex, stages.length - 1)) {
+      article.classList.add("active");
+    }
+    article.append(title, status, detail);
+    output.pipelineGraph.append(article);
+  });
+
+  output.bottleneckList.replaceChildren();
+  bottlenecks(state).forEach(([title, value, body]) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    const meter = document.createElement("div");
+    const meterValue = document.createElement("span");
+    strong.textContent = title;
+    span.textContent = body;
+    li.className = severityForLoad(value);
+    meter.className = "bottleneck-meter";
+    meterValue.style.width = percentage(value);
+    meter.append(meterValue);
+    li.append(strong, span, meter);
+    output.bottleneckList.append(li);
+  });
+
+  output.fixSuggestions.replaceChildren();
+  fixSuggestions(state).forEach(([title, body]) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const span = document.createElement("span");
+    strong.textContent = title;
+    span.textContent = body;
+    li.className = title === "Block generation" ? "error" : title === "Optional model advisor" ? "" : state.severity;
+    li.append(strong, span);
+    output.fixSuggestions.append(li);
+  });
+
+  output.adapterOutput.textContent = JSON.stringify(
+    {
+      severity: state.severity,
+      block_generation: state.severity === "error",
+      approved_context: state.severity === "error" ? "hold_for_review" : "ready",
+      adapter: "GuardedRetriever(existing_retriever)",
+      model_handoff: state.severity === "error" ? "blocked" : "allowed",
+    },
+    null,
+    2,
+  );
 }
 
 function updateDiagnostics(state) {
@@ -380,6 +540,7 @@ function render() {
   updateConfigSummary(state);
   updateEventLog();
   updateProgressWindow();
+  updatePipelineView(state);
 }
 
 function resetControls() {

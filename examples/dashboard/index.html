@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'"
     >
     <title>RAGScaleGuard Dashboard</title>
     <link rel="stylesheet" href="styles.css">
@@ -14,9 +14,15 @@
   <body class="console-mode">
     <main class="app-shell">
       <header class="console-header" aria-labelledby="page-title">
-        <div>
-          <h1 id="page-title">RAGScaleGuard</h1>
-          <span>Reliable AI retrieval</span>
+        <div class="brand-lockup">
+          <img
+            id="brandLogo"
+            class="brand-logo"
+            src="assets/ragscaleguard-logo-lockup.png"
+            alt="RAGScaleGuard - Reliable AI retrieval"
+            draggable="false"
+          >
+          <h1 id="page-title" class="sr-only">RAGScaleGuard</h1>
         </div>
         <div class="run-card" aria-label="Current run summary">
           <span class="label">Run profile</span>
@@ -76,6 +82,14 @@
               <output id="corpusSizeValue" for="corpusSize">80k</output>
             </div>
             <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
+          </div>
+
+          <div class="control-set compact-range">
+            <div class="range-row">
+              <label for="signalLevel">Signals <button class="info-button" type="button" aria-label="Signals help" data-info="Controls how many hardening signals are enabled: metadata, authority, freshness and conflict guard."></button></label>
+              <output id="signalLevelValue" for="signalLevel">4/4</output>
+            </div>
+            <input id="signalLevel" type="range" min="1" max="4" step="1" value="4">
           </div>
 
           <div class="control-set compact-range">
@@ -198,7 +212,38 @@
               <span>Validation<br>Gate</span>
             </div>
             <div class="document-stack" aria-label="Approved context">
-              <div></div><div></div><div></div><div></div>
+              <div>
+                <svg class="document-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 3h8l4 4v14H6Z"></path>
+                  <path d="M14 3v5h5"></path>
+                  <path d="M9 12h6"></path>
+                  <path d="M9 16h5"></path>
+                </svg>
+              </div>
+              <div>
+                <svg class="document-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 3h8l4 4v14H6Z"></path>
+                  <path d="M14 3v5h5"></path>
+                  <path d="M9 12h6"></path>
+                  <path d="M9 16h5"></path>
+                </svg>
+              </div>
+              <div>
+                <svg class="document-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 3h8l4 4v14H6Z"></path>
+                  <path d="M14 3v5h5"></path>
+                  <path d="M9 12h6"></path>
+                  <path d="M9 16h5"></path>
+                </svg>
+              </div>
+              <div>
+                <svg class="document-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M6 3h8l4 4v14H6Z"></path>
+                  <path d="M14 3v5h5"></path>
+                  <path d="M9 12h6"></path>
+                  <path d="M9 16h5"></path>
+                </svg>
+              </div>
             </div>
           </div>
 
@@ -213,6 +258,7 @@
             </div>
             <div class="gauge-wrap" aria-hidden="true">
               <div class="quality-gauge"><span id="qualityNeedle"></span></div>
+              <output id="qualityScoreValue" class="quality-score" aria-label="Retrieval quality score">0.00</output>
             </div>
             <div class="metric-grid">
               <article><span>Recall@k</span><strong id="recallValue">0.00</strong><div class="bar"><span id="recallBar"></span></div></article>

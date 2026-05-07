@@ -75,6 +75,7 @@ const controls = {
   queryType: document.querySelector("#queryType"),
   retriever: document.querySelector("#retriever"),
   corpusSize: document.querySelector("#corpusSize"),
+  signalLevel: document.querySelector("#signalLevel"),
   topK: document.querySelector("#topK"),
   metadata: document.querySelector("#metadata"),
   authority: document.querySelector("#authority"),
@@ -96,6 +97,7 @@ const output = {
   runProfile: document.querySelector("#runProfile"),
   runSummary: document.querySelector("#runSummary"),
   corpusSizeValue: document.querySelector("#corpusSizeValue"),
+  signalLevelValue: document.querySelector("#signalLevelValue"),
   topKValue: document.querySelector("#topKValue"),
   recallValue: document.querySelector("#recallValue"),
   precisionValue: document.querySelector("#precisionValue"),
@@ -128,6 +130,7 @@ const output = {
   simulationCanvas: document.querySelector("#simulationCanvas"),
   pipelineSvg: document.querySelector("#pipelineSvg"),
   qualityNeedle: document.querySelector("#qualityNeedle"),
+  qualityScoreValue: document.querySelector("#qualityScoreValue"),
   pipelineHealth: document.querySelector("#pipelineHealth"),
   pipelineGraph: document.querySelector("#pipelineGraph"),
   bottleneckList: document.querySelector("#bottleneckList"),
@@ -380,6 +383,7 @@ function updateProgressWindow() {
 }
 
 function updateKnobs(state) {
+  const enabledSignals = enabledSignalCount();
   controls.knobs.forEach((knob) => {
     const dial = knob.querySelector(".dial span");
     if (!dial) return;
@@ -389,7 +393,6 @@ function updateKnobs(state) {
       knob.setAttribute("aria-label", `Adjust corpus size. Current value ${state.corpusSize}k documents.`);
     }
     if (knob.dataset.knob === "signals") {
-      const enabledSignals = enabledSignalCount();
       dial.style.setProperty("--turn", `${-58 + (enabledSignals / 4) * 116}deg`);
       output.knobSignalsValue.textContent = `${enabledSignals}/4`;
       knob.setAttribute("aria-label", `Adjust scoring signals. Current value ${enabledSignals} of 4 enabled.`);
@@ -400,6 +403,8 @@ function updateKnobs(state) {
       knob.setAttribute("aria-label", `Adjust top-k. Current value ${state.topK}.`);
     }
   });
+  controls.signalLevel.value = String(enabledSignals);
+  output.signalLevelValue.textContent = `${enabledSignals}/4`;
 }
 
 function enabledSignalCount() {
@@ -413,6 +418,7 @@ function enabledSignalCount() {
 
 function setSignalLevel(level) {
   const nextLevel = clamp(level, 1, 4);
+  controls.signalLevel.value = String(nextLevel);
   controls.metadata.checked = nextLevel >= 1;
   controls.authority.checked = nextLevel >= 2;
   controls.freshness.checked = nextLevel >= 3;
@@ -627,6 +633,7 @@ function updateSimulationCanvas(state) {
   const qualityScore = clamp(state.recall * 0.45 + state.precision * 0.35 + state.citation * 0.2, 0, 1);
   const angle = -58 + qualityScore * 116;
   output.qualityNeedle.style.transform = `translateX(-50%) rotate(${angle.toFixed(1)}deg)`;
+  output.qualityScoreValue.textContent = formatScore(qualityScore);
   setSeverity(output.qualityNeedle.closest(".quality-gauge"), state.severity);
 }
 
@@ -1150,6 +1157,11 @@ window.addEventListener("unhandledrejection", (event) => {
   control.addEventListener("input", render);
 });
 
+controls.signalLevel.addEventListener("input", () => {
+  setSignalLevel(Number.parseInt(controls.signalLevel.value, 10));
+  recordLog("info", "Signal bar changed hardening signals.", { enabled_signals: controls.signalLevel.value });
+  render();
+});
 controls.queryType.addEventListener("input", () => {
   applyScenarioPreset(controls.queryType.value);
   recordLog("info", "Scenario preset updated the stack controls.", { scenario: controls.queryType.value });

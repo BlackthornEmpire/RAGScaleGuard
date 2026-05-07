@@ -1,6 +1,12 @@
+<p align="center">
+  <img src="examples/dashboard/assets/ragscaleguard-logo-lockup.png" alt="RAGScaleGuard - Reliable AI retrieval" width="560">
+</p>
+
 # RAGScaleGuard
 
 RAGScaleGuard is an open-source retrieval hardening toolkit for enterprise RAG. It helps teams diagnose and reduce retrieval collapse caused by dense semantic neighbourhoods, near-duplicates, stale documents, fragmented sources, and conflicting internal knowledge.
+
+The RAGScaleGuard name, shield logo, cube/orbit mark, and "Reliable AI retrieval" lock-up are official project branding. See [TRADEMARKS.md](TRADEMARKS.md) before redistributing modified versions or using the marks outside this project.
 
 It is a practical framework for comparing retrieval strategies, finding why top-k failed, and producing auditable reports at enterprise-like scale.
 
@@ -69,6 +75,26 @@ python examples/serve_dashboard.py
 
 When served locally, dashboard events and error states are written to `reports/dashboard-events.jsonl`.
 The local event endpoint accepts only bounded JSON events, redacts common secret fields, and rotates the event log before unbounded growth.
+
+### Visual Walkthrough
+
+The dashboard is designed to show the retrieval path, current quality, candidate evidence, fault states, and optional local adviser output without needing a remote service.
+
+![Compact dashboard view](docs/assets/screenshots/dashboard-compact.png)
+
+Run the simulation to watch the pipeline move from query intake through retrieval, density analysis, reranking, conflict checks, validation, and approved context.
+
+![Running dashboard simulation](docs/assets/screenshots/dashboard-running.png)
+
+Broken or risky stages turn red automatically, including the progress bar, affected pipeline nodes, metric cards, and recommendations.
+
+![Blocked retrieval state](docs/assets/screenshots/dashboard-risk-state.png)
+
+Full details mode exposes the operational view used for investigation: stage status, bottlenecks, fix suggestions, adapter output, adviser controls, review toggles, and the local event log.
+
+![Full details dashboard](docs/assets/screenshots/dashboard-full-details.png)
+
+See [docs/dashboard_walkthrough.md](docs/dashboard_walkthrough.md) for a short guide to each dashboard area.
 
 ## Local Corpus Evaluation
 

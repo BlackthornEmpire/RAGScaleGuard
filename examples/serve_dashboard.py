@@ -23,6 +23,10 @@ SECRET_RE = re.compile(
     r"(?i)\b(api[_-]?key|token|secret|password)\s*[:=]\s*['\"]?([^'\"\s,}]+)"
 )
 CONTROL_CHARS_RE = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+CSP_POLICY = (
+    "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+    "connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+)
 
 
 class LocalTCPServer(socketserver.TCPServer):
@@ -33,6 +37,12 @@ class DashboardHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args: Any, directory: str, log_path: Path, **kwargs: Any) -> None:
         self.log_path = log_path
         super().__init__(*args, directory=directory, **kwargs)
+
+    def end_headers(self) -> None:
+        self.send_header("Content-Security-Policy", CSP_POLICY)
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        super().end_headers()
 
     def do_POST(self) -> None:
         if self.path == "/events":

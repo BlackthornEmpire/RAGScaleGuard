@@ -35,6 +35,7 @@ def test_dashboard_has_operational_control_sections() -> None:
 
     expected_ids = [
         "runComparison",
+        "stopSimulation",
         "resetControls",
         "detailToggle",
         "pipelineSvg",
@@ -55,6 +56,7 @@ def test_dashboard_has_operational_control_sections() -> None:
         "adviserModel",
         "runAdviser",
         "adviserProblem",
+        "infoTooltip",
     ]
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
@@ -63,6 +65,9 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "Full details" in html
     assert "data-knob" in html
     assert "source-mark" in html
+    assert "M5.042 15.165" in html
+    assert "M11.571 11.513" in html
+    assert "M.87 18.257" in html
     assert "stage-icon" in html
     assert "palette-info" in html
     assert "palette-control" in html
@@ -81,12 +86,16 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert "summaryRecommendations" in script
     assert "updateViewMode" in script
     assert "handleKnobPress" in script
+    assert "function stopSimulation" in script
+    assert "function showInfoTooltip" in script
+    assert "function positionInfoTooltip" in script
     assert "stageSymbols" in script
     assert ".diagnostics.error" in styles
     assert ".summary-panel.error" in styles
     assert ".console-mode .dashboard-grid" in styles
     assert ".source-mark" in styles
     assert ".stage-icon" in styles
+    assert ".info-tooltip" in styles
     assert ".flow-path.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles

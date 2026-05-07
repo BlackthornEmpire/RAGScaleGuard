@@ -76,10 +76,12 @@ const controls = {
   adviserModel: document.querySelector("#adviserModel"),
   runAdviser: document.querySelector("#runAdviser"),
   runComparison: document.querySelector("#runComparison"),
+  stopSimulation: document.querySelector("#stopSimulation"),
   resetControls: document.querySelector("#resetControls"),
   detailToggle: document.querySelector("#detailToggle"),
   knobs: document.querySelectorAll("[data-knob]"),
   themeDots: document.querySelectorAll("[data-theme-dot]"),
+  infoButtons: document.querySelectorAll(".info-button"),
 };
 
 const output = {
@@ -124,12 +126,16 @@ const output = {
   adviserWhy: document.querySelector("#adviserWhy"),
   adviserFix: document.querySelector("#adviserFix"),
   adviserRisk: document.querySelector("#adviserRisk"),
+  infoTooltip: document.querySelector("#infoTooltip"),
 };
 
 const logItems = [];
 let progressIndex = 0;
 let progressTimer = 0;
 let hasRun = false;
+let isStopped = false;
+let activeInfoButton = null;
+let infoTooltipPinned = false;
 
 const progressSteps = [
   ["Adapter", "Normalise external retriever output."],
@@ -352,6 +358,8 @@ function updateProgressWindow() {
   setSeverity(output.progressBar.parentElement, state.severity);
   if (!hasRun) {
     output.progressState.textContent = "Idle";
+  } else if (isStopped) {
+    output.progressState.textContent = "Stopped";
   } else {
     output.progressState.textContent = progressIndex >= progressSteps.length ? "Complete" : "Running";
   }
@@ -426,7 +434,7 @@ function simulationStageSeverity(stage, state) {
 function updateSimulationCanvas(state) {
   const activeStage = activeSimulationStage();
   output.simulationCanvas.classList.remove("running", "warn", "error");
-  if (hasRun && progressIndex < progressSteps.length) {
+  if (hasRun && !isStopped && progressIndex < progressSteps.length) {
     output.simulationCanvas.classList.add("running");
   }
   if (hasRun && state.severity !== "ok") {
@@ -797,11 +805,13 @@ function render() {
   updateSimulationCanvas(state);
   updatePipelineView(state);
   updateKnobs(state);
+  controls.stopSimulation.disabled = !hasRun || isStopped || progressIndex >= progressSteps.length;
 }
 
 function resetControls() {
   window.clearInterval(progressTimer);
   hasRun = false;
+  isStopped = false;
   progressIndex = 0;
   controls.queryType.value = "deadline";
   controls.retriever.value = "rerank";
@@ -821,6 +831,7 @@ function runComparison() {
   const state = calculateState();
   window.clearInterval(progressTimer);
   hasRun = true;
+  isStopped = false;
   progressIndex = 0;
   recordLog(
     state.severity,
@@ -832,10 +843,23 @@ function runComparison() {
     if (progressIndex >= progressSteps.length) {
       window.clearInterval(progressTimer);
       progressIndex = progressSteps.length;
+      isStopped = false;
       recordLog(state.severity, "Run completed and review actions updated.");
     }
     render();
   }, 520);
+}
+
+function stopSimulation() {
+  if (!hasRun || progressIndex >= progressSteps.length) {
+    recordLog("info", "Stop ignored because no simulation is running.");
+    render();
+    return;
+  }
+  window.clearInterval(progressTimer);
+  isStopped = true;
+  recordLog("warn", "Simulation stopped by user.");
+  render();
 }
 
 async function runAdviser() {
@@ -914,6 +938,55 @@ function writeExternalLog(entry) {
     .catch(() => undefined);
 }
 
+function positionInfoTooltip(button) {
+  const tooltip = output.infoTooltip;
+  if (!tooltip || !button) return;
+
+  const margin = 12;
+  const gap = 10;
+  const buttonRect = button.getBoundingClientRect();
+  tooltip.hidden = false;
+  const tooltipRect = tooltip.getBoundingClientRect();
+  const maxLeft = window.innerWidth - tooltipRect.width - margin;
+  const left = clamp(buttonRect.left + buttonRect.width / 2 - tooltipRect.width / 2, margin, maxLeft);
+  const above = buttonRect.top - tooltipRect.height - gap;
+  const top = above > margin ? above : buttonRect.bottom + gap;
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+}
+
+function showInfoTooltip(button, pinned = false) {
+  const message = button.dataset.info || "";
+  if (!message) return;
+  if (activeInfoButton && activeInfoButton !== button) {
+    activeInfoButton.removeAttribute("aria-describedby");
+  }
+
+  activeInfoButton = button;
+  infoTooltipPinned = pinned;
+  output.infoTooltip.textContent = message;
+  button.setAttribute("aria-describedby", "infoTooltip");
+  positionInfoTooltip(button);
+}
+
+function hideInfoTooltip() {
+  if (activeInfoButton) {
+    activeInfoButton.removeAttribute("aria-describedby");
+  }
+  activeInfoButton = null;
+  infoTooltipPinned = false;
+  output.infoTooltip.hidden = true;
+}
+
+function toggleInfoTooltip(button) {
+  if (activeInfoButton === button && infoTooltipPinned) {
+    hideInfoTooltip();
+    return;
+  }
+  showInfoTooltip(button, true);
+}
+
 window.addEventListener("error", (event) => {
   recordLog("error", "Unhandled dashboard error.", {
     message: event.message,
@@ -944,6 +1017,7 @@ window.addEventListener("unhandledrejection", (event) => {
 
 controls.resetControls.addEventListener("click", resetControls);
 controls.runComparison.addEventListener("click", runComparison);
+controls.stopSimulation.addEventListener("click", stopSimulation);
 controls.adviserMode.addEventListener("input", updateAdviserMode);
 controls.runAdviser.addEventListener("click", runAdviser);
 controls.detailToggle.addEventListener("input", updateViewMode);
@@ -955,6 +1029,33 @@ controls.themeDots.forEach((dot) => {
     render();
   });
 });
+controls.infoButtons.forEach((button) => {
+  button.addEventListener("mouseenter", () => showInfoTooltip(button));
+  button.addEventListener("mouseleave", () => {
+    if (!infoTooltipPinned) hideInfoTooltip();
+  });
+  button.addEventListener("focus", () => showInfoTooltip(button));
+  button.addEventListener("blur", () => {
+    if (!infoTooltipPinned) hideInfoTooltip();
+  });
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    toggleInfoTooltip(button);
+  });
+});
+document.addEventListener("click", (event) => {
+  if (!event.target.closest(".info-button")) {
+    hideInfoTooltip();
+  }
+});
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    hideInfoTooltip();
+  }
+});
+window.addEventListener("resize", () => positionInfoTooltip(activeInfoButton));
+window.addEventListener("scroll", () => positionInfoTooltip(activeInfoButton), true);
 
 recordLog("info", "Dashboard loaded with local sample state.");
 updateAdviserMode();

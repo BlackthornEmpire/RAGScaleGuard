@@ -94,6 +94,7 @@ body {
   grid-template-columns: 175px minmax(0, 1fr) 225px;
   gap: 10px;
   height: 420px;
+  margin-bottom: clamp(56px, 4.7vw, 78px);
   border: 3px solid #060811;
   border-radius: 14px 14px 20px 20px;
   background:
@@ -109,6 +110,7 @@ body {
 .details-open .console-frame {
   height: auto;
   min-height: 420px;
+  margin-bottom: clamp(66px, 5.2vw, 88px);
 }
 
 .console-frame::after {
@@ -2166,42 +2168,14 @@ h1 {
 
 .palette-dock {
   position: absolute;
-  right: clamp(10px, 1vw, 18px);
-  bottom: clamp(-96px, -5.4vw, -72px);
+  left: 50%;
+  bottom: clamp(-78px, -4.8vw, -58px);
   z-index: 4;
   display: flex;
   align-items: center;
-  gap: clamp(8px, 0.8vw, 12px);
-  max-width: min(460px, 40vw);
-}
-
-.palette-info {
-  max-width: clamp(150px, 14vw, 240px);
-  border: 1px solid rgba(126, 240, 223, 0.24);
-  border-radius: 10px;
-  background: rgba(9, 8, 18, 0.92);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
-  padding: clamp(8px, 0.65vw, 11px);
-}
-
-.palette-info strong,
-.palette-info span {
-  display: block;
-}
-
-.palette-info strong {
-  color: var(--ink);
-  font-size: clamp(0.68rem, 0.62vw, 0.82rem);
-  font-weight: 950;
-  line-height: 1.1;
-}
-
-.palette-info span {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: clamp(0.6rem, 0.54vw, 0.72rem);
-  font-weight: 700;
-  line-height: 1.25;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  transform: translateX(-50%);
 }
 
 .palette-control {
@@ -2214,7 +2188,7 @@ h1 {
   padding: clamp(10px, 0.95vw, 16px) clamp(16px, 1.5vw, 26px);
 }
 
-.palette-control button {
+.palette-control button[data-theme-dot] {
   width: clamp(20px, 1.6vw, 30px);
   min-height: clamp(20px, 1.6vw, 30px);
   height: clamp(20px, 1.6vw, 30px);
@@ -2222,6 +2196,13 @@ h1 {
   border-radius: 50%;
   padding: 0;
   background: var(--dot, #fff);
+}
+
+.palette-control .info-button {
+  width: 18px;
+  min-height: 18px;
+  height: 18px;
+  flex: 0 0 18px;
 }
 
 .palette-control button:nth-child(1) { --dot: #ff4d5f; }
@@ -2276,6 +2257,7 @@ h1 {
   .console-frame {
     grid-template-columns: 1fr;
     height: auto;
+    margin-bottom: 18px;
   }
 
   .right-rail {
@@ -2345,10 +2327,6 @@ h1 {
     transform: translateX(-50%);
   }
 
-  .console-frame {
-    margin-bottom: 18px;
-  }
-
   .console-frame::after {
     bottom: -18px;
     width: clamp(150px, 42vw, 240px);
@@ -2358,15 +2336,11 @@ h1 {
   .palette-dock {
     position: static;
     grid-column: 1;
-    flex-direction: column;
     align-items: stretch;
     max-width: none;
     margin-top: 8px;
-  }
-
-  .palette-info {
-    max-width: none;
-    text-align: center;
+    width: auto;
+    transform: none;
   }
 
   .palette-control {

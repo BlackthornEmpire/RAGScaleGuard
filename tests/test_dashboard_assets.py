@@ -70,8 +70,8 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "M11.571 11.513" in html
     assert "M.87 18.257" in html
     assert "stage-icon" in html
-    assert "palette-info" in html
     assert "palette-control" in html
+    assert "palette-help" in html
     assert "Status colours" in html
     assert "info-button" in html
 
@@ -97,6 +97,7 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert ".source-mark" in styles
     assert ".stage-icon" in styles
     assert ".info-tooltip" in styles
+    assert ".palette-control .info-button" in styles
     assert ".flow-path.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles

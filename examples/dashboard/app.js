@@ -89,6 +89,7 @@ const output = {
   precisionBar: document.querySelector("#precisionBar"),
   citationBar: document.querySelector("#citationBar"),
   densityBar: document.querySelector("#densityBar"),
+  diagnosticsPanel: document.querySelector("#diagnosticsPanel"),
   topKStatus: document.querySelector("#topKStatus"),
   conflictStatus: document.querySelector("#conflictStatus"),
   recommendation: document.querySelector("#recommendation"),
@@ -103,7 +104,7 @@ const output = {
   progressSteps: document.querySelector("#progressSteps"),
 };
 
-const logItems = ["Dashboard loaded with local sample state."];
+const logItems = [];
 let progressIndex = 0;
 let progressTimer = 0;
 let hasRun = false;
@@ -158,11 +159,52 @@ function calculateState() {
     0.97,
   );
 
-  return { scenario, retriever, corpusSize, topK, densityRisk, recall, precision, citation };
+  const topKStress = topK < 5 && densityRisk > 0.55;
+  const conflictRisk = scenario.conflict > 0.5 && !controls.conflictGuard.checked;
+  const precisionRisk = precision < 0.5;
+  const severity =
+    conflictRisk || densityRisk > 0.78 || recall < 0.45
+      ? "error"
+      : topKStress || precisionRisk || densityRisk > 0.62
+        ? "warn"
+        : "ok";
+
+  return {
+    scenario,
+    retriever,
+    corpusSize,
+    topK,
+    densityRisk,
+    recall,
+    precision,
+    citation,
+    topKStress,
+    conflictRisk,
+    precisionRisk,
+    severity,
+  };
 }
 
 function setBar(element, value) {
   element.style.width = percentage(value);
+}
+
+function setSeverity(element, severity) {
+  element.classList.remove("warn", "error");
+  if (severity === "warn" || severity === "error") {
+    element.classList.add(severity);
+  }
+}
+
+function metricSeverity(kind, value, state) {
+  if (kind === "density") {
+    if (state.severity === "error") return "error";
+    if (value >= 0.62) return "warn";
+    return "ok";
+  }
+  if (value < 0.5) return "error";
+  if (value < 0.68) return "warn";
+  return "ok";
 }
 
 function densityLabel(value) {
@@ -217,6 +259,11 @@ function updateReviewQueue(state) {
     const span = document.createElement("span");
     strong.textContent = title;
     span.textContent = body;
+    if (title === "High density" || title === "Conflicting evidence") {
+      li.className = state.severity;
+    } else if (title === "Low precision") {
+      li.className = "warn";
+    }
     li.append(strong, span);
     output.reviewItems.append(li);
   });
@@ -235,14 +282,16 @@ function updateEventLog() {
     const li = document.createElement("li");
     const strong = document.createElement("strong");
     const span = document.createElement("span");
-    strong.textContent = "Local event";
-    span.textContent = entry;
+    strong.textContent = entry.level.toUpperCase();
+    span.textContent = entry.message;
+    li.className = entry.level === "error" ? "error" : entry.level === "warn" ? "warn" : "";
     li.append(strong, span);
     output.eventLog.prepend(li);
   });
 }
 
 function updateProgressWindow() {
+  const state = calculateState();
   output.progressSteps.replaceChildren();
   progressSteps.forEach(([title, body], index) => {
     const li = document.createElement("li");
@@ -255,11 +304,21 @@ function updateProgressWindow() {
     } else if (index === progressIndex) {
       li.className = "active";
     }
+    if (
+      state.severity === "error" &&
+      ((state.conflictRisk && title === "Check conflicts") ||
+        (state.densityRisk > 0.78 && title === "Retrieve"))
+    ) {
+      li.className = index <= progressIndex || progressIndex >= progressSteps.length ? "error" : li.className;
+    } else if (state.severity === "warn" && title === "Rerank") {
+      li.className = index <= progressIndex || progressIndex >= progressSteps.length ? "warn" : li.className;
+    }
     li.append(strong, span);
     output.progressSteps.append(li);
   });
   const percent = progressIndex / progressSteps.length;
   output.progressBar.style.width = percentage(percent);
+  setSeverity(output.progressBar.parentElement, state.severity);
   if (!hasRun) {
     output.progressState.textContent = "Idle";
   } else {
@@ -268,14 +327,13 @@ function updateProgressWindow() {
 }
 
 function updateDiagnostics(state) {
-  const topKStress = state.topK < 5 && state.densityRisk > 0.55;
-  const conflictRisk = state.scenario.conflict > 0.5 && !controls.conflictGuard.checked;
+  setSeverity(output.diagnosticsPanel, state.severity);
 
-  output.topKStatus.textContent = topKStress
+  output.topKStatus.textContent = state.topKStress
     ? "Likely to miss fact-bearing evidence. Increase top-k or add stronger ranking signals."
     : "Candidate set has enough room for this simulation.";
 
-  output.conflictStatus.textContent = conflictRisk
+  output.conflictStatus.textContent = state.conflictRisk
     ? "Conflicting evidence is likely to reach generation without an explicit guard."
     : "Contradictory evidence is either low-risk or flagged by the guard.";
 
@@ -307,6 +365,14 @@ function render() {
   setBar(output.precisionBar, state.precision);
   setBar(output.citationBar, state.citation);
   setBar(output.densityBar, state.densityRisk);
+  setSeverity(output.recallBar.parentElement, metricSeverity("recall", state.recall, state));
+  setSeverity(output.precisionBar.parentElement, metricSeverity("precision", state.precision, state));
+  setSeverity(output.citationBar.parentElement, metricSeverity("citation", state.citation, state));
+  setSeverity(output.densityBar.parentElement, metricSeverity("density", state.densityRisk, state));
+  setSeverity(output.recallBar.closest("article"), metricSeverity("recall", state.recall, state));
+  setSeverity(output.precisionBar.closest("article"), metricSeverity("precision", state.precision, state));
+  setSeverity(output.citationBar.closest("article"), metricSeverity("citation", state.citation, state));
+  setSeverity(output.densityBar.closest("article"), metricSeverity("density", state.densityRisk, state));
 
   updateDiagnostics(state);
   updateRows(state);
@@ -328,7 +394,7 @@ function resetControls() {
   controls.authority.checked = true;
   controls.freshness.checked = true;
   controls.conflictGuard.checked = true;
-  logItems.push("Controls reset to the default profile.");
+  recordLog("info", "Controls reset to the default profile.");
   render();
 }
 
@@ -337,7 +403,8 @@ function runComparison() {
   window.clearInterval(progressTimer);
   hasRun = true;
   progressIndex = 0;
-  logItems.push(
+  recordLog(
+    state.severity,
     `Compared ${state.retriever.label} on ${state.scenario.label.toLowerCase()} at ${state.corpusSize}k corpus.`,
   );
   render();
@@ -346,11 +413,56 @@ function runComparison() {
     if (progressIndex >= progressSteps.length) {
       window.clearInterval(progressTimer);
       progressIndex = progressSteps.length;
-      logItems.push("Run completed and review actions updated.");
+      recordLog(state.severity, "Run completed and review actions updated.");
     }
     render();
   }, 520);
 }
+
+function recordLog(level, message, details = {}) {
+  const entry = {
+    level: level === "error" || level === "warn" ? level : "info",
+    message,
+    details,
+    timestamp: new Date().toISOString(),
+  };
+  logItems.push(entry);
+  writeExternalLog(entry);
+}
+
+function writeExternalLog(entry) {
+  if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+    return;
+  }
+  const payload = JSON.stringify(entry);
+  if (navigator.sendBeacon) {
+    navigator.sendBeacon("/events", new Blob([payload], { type: "application/json" }));
+    return;
+  }
+  window
+    .fetch("/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: payload,
+      keepalive: true,
+    })
+    .catch(() => undefined);
+}
+
+window.addEventListener("error", (event) => {
+  recordLog("error", "Unhandled dashboard error.", {
+    message: event.message,
+    source: event.filename,
+    line: event.lineno,
+    column: event.colno,
+  });
+});
+
+window.addEventListener("unhandledrejection", (event) => {
+  recordLog("error", "Unhandled dashboard promise rejection.", {
+    reason: String(event.reason),
+  });
+});
 
 [
   controls.queryType,
@@ -368,4 +480,5 @@ function runComparison() {
 controls.resetControls.addEventListener("click", resetControls);
 controls.runComparison.addEventListener("click", runComparison);
 
+recordLog("info", "Dashboard loaded with local sample state.");
 render();

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
     >
     <title>RAGScaleGuard Dashboard</title>
     <link rel="stylesheet" href="styles.css">
@@ -115,7 +115,7 @@
           </div>
         </section>
 
-        <section class="panel diagnostics" aria-labelledby="diagnostics-title">
+        <section id="diagnosticsPanel" class="panel diagnostics" aria-labelledby="diagnostics-title">
           <h2 id="diagnostics-title">What to do next</h2>
           <dl>
             <div>
@@ -171,6 +171,7 @@
               <h3 id="log-title">Event log</h3>
               <p id="lastRun">Not started</p>
               <p id="evidencePolicy">Cite top candidate and flag conflicts</p>
+              <p>External log: <code>reports/dashboard-events.jsonl</code></p>
               <ol id="eventLog"></ol>
             </section>
           </div>

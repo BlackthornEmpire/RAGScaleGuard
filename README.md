@@ -40,6 +40,8 @@ To serve it locally:
 python examples/serve_dashboard.py
 ```
 
+When served locally, dashboard events and error states are written to `reports/dashboard-events.jsonl`.
+
 ## Local Corpus Evaluation
 
 RAGScaleGuard can evaluate any local enterprise-style corpus represented as JSONL documents and questions. It does not bundle or require external corpora.

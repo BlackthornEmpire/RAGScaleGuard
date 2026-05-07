@@ -9,6 +9,8 @@
   --accent: #9b5cff;
   --accent-2: #c084fc;
   --warn: #f0a84b;
+  --bad: #ff4d5f;
+  --bad-soft: rgba(255, 77, 95, 0.12);
   --good: #53d39a;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
 }
@@ -231,6 +233,14 @@ summary:focus-visible {
   transition: width 180ms ease;
 }
 
+.progress-track.warn span {
+  background: linear-gradient(90deg, var(--warn), #ffd27a);
+}
+
+.progress-track.error span {
+  background: linear-gradient(90deg, var(--bad), #ff8b94);
+}
+
 .progress-window {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -265,6 +275,20 @@ summary:focus-visible {
   color: var(--good);
 }
 
+.progress-window .warn {
+  border-color: var(--warn);
+}
+
+.progress-window .error {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+  box-shadow: inset 0 0 0 1px rgba(255, 77, 95, 0.2);
+}
+
+.progress-window .error strong {
+  color: #ffb4bb;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -278,6 +302,19 @@ summary:focus-visible {
   border-radius: 8px;
   padding: 14px;
   background: #0b0813;
+}
+
+.metric-grid article.warn {
+  border-color: var(--warn);
+}
+
+.metric-grid article.error {
+  border-color: var(--bad);
+  background: var(--bad-soft);
+}
+
+.metric-grid article.error strong {
+  color: #ffccd1;
 }
 
 .metric-grid strong {
@@ -305,6 +342,28 @@ summary:focus-visible {
 
 .bar.risk span {
   background: var(--warn);
+}
+
+.bar.warn span {
+  background: var(--warn);
+}
+
+.bar.error span {
+  background: var(--bad);
+}
+
+.diagnostics.warn {
+  border-color: var(--warn);
+}
+
+.diagnostics.error {
+  border-color: var(--bad);
+  background: linear-gradient(180deg, rgba(70, 19, 33, 0.7), rgba(25, 10, 18, 0.96));
+}
+
+.diagnostics.error dt,
+.diagnostics.error h2 {
+  color: #ffccd1;
 }
 
 dl {
@@ -391,6 +450,17 @@ summary {
   padding: 11px;
   color: var(--muted);
   line-height: 1.4;
+}
+
+.review li.warn,
+.log li.warn {
+  border-color: var(--warn);
+}
+
+.review li.error,
+.log li.error {
+  border-color: var(--bad);
+  background: var(--bad-soft);
 }
 
 .toggle-list label {

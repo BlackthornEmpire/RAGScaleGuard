@@ -96,6 +96,10 @@ const output = {
   topKStatus: document.querySelector("#topKStatus"),
   conflictStatus: document.querySelector("#conflictStatus"),
   recommendation: document.querySelector("#recommendation"),
+  summaryPanel: document.querySelector("#summaryPanel"),
+  summaryHealth: document.querySelector("#summaryHealth"),
+  summaryState: document.querySelector("#summaryState"),
+  summaryItems: document.querySelector("#summaryItems"),
   candidateRows: document.querySelector("#candidateRows"),
   reviewCount: document.querySelector("#reviewCount"),
   lastRun: document.querySelector("#lastRun"),
@@ -506,6 +510,48 @@ function fixSuggestions(state) {
   return suggestions;
 }
 
+function summaryRecommendations(state) {
+  const items = [];
+  if (state.densityRisk > 0.72) {
+    items.push("Candidate set is crowded. Increase candidate depth and rerank before generation.");
+  } else {
+    items.push("Candidate set has room for this simulation.");
+  }
+  if (state.conflictRisk) {
+    items.push("Conflicting evidence can reach generation. Block model handoff until final evidence is selected.");
+  } else {
+    items.push("Contradictory factors are low or flagged by the guard.");
+  }
+  if (state.precision < 0.55) {
+    items.push("Precision is weak. Tighten reranking, authority scoring, and freshness scoring.");
+  } else if (state.severity !== "error") {
+    items.push("Current settings are balanced for this scenario before generation.");
+  }
+  if (state.topKStress) {
+    items.push("Top-k is tight for this density. Increase visible candidates before the rerank step.");
+  }
+  return items;
+}
+
+function updateSummaryPanel(state) {
+  const status =
+    state.severity === "error"
+      ? ["Red: Blocked", "error"]
+      : state.severity === "warn"
+        ? ["Amber: Review", "warn"]
+        : ["Green: Healthy", "ok"];
+
+  setSeverity(output.summaryPanel, status[1]);
+  setSeverity(output.summaryHealth, status[1]);
+  output.summaryState.textContent = status[0];
+  output.summaryItems.replaceChildren();
+  summaryRecommendations(state).forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    output.summaryItems.append(li);
+  });
+}
+
 function updatePipelineView(state) {
   const stages = pipelineStages(state);
   output.pipelineHealth.textContent =
@@ -668,6 +714,7 @@ function render() {
   setSeverity(output.densityBar.closest("article"), metricSeverity("density", state.densityRisk, state));
 
   updateDiagnostics(state);
+  updateSummaryPanel(state);
   updateRows(state);
   updateReviewQueue(state);
   updateConfigSummary(state);

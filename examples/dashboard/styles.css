@@ -146,6 +146,7 @@ body {
 .right-rail {
   display: grid;
   gap: 12px;
+  align-content: start;
   min-width: 0;
 }
 
@@ -376,6 +377,97 @@ body {
   border-color: var(--bad);
   background: linear-gradient(180deg, rgba(255, 77, 95, 0.24), rgba(88, 25, 44, 0.48));
   box-shadow: 0 0 18px rgba(255, 77, 95, 0.48);
+}
+
+.summary-panel {
+  background:
+    radial-gradient(circle at 35% 0%, rgba(155, 92, 255, 0.18), transparent 12rem),
+    linear-gradient(180deg, rgba(35, 25, 63, 0.98), rgba(18, 13, 34, 0.98));
+}
+
+.summary-panel.warn {
+  border-color: var(--warn);
+}
+
+.summary-panel.error {
+  border-color: var(--bad);
+  background:
+    radial-gradient(circle at 35% 0%, rgba(255, 77, 95, 0.16), transparent 12rem),
+    linear-gradient(180deg, rgba(60, 19, 36, 0.98), rgba(18, 13, 34, 0.98));
+}
+
+.health-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  border: 1px solid rgba(83, 211, 154, 0.54);
+  border-radius: 6px;
+  background: rgba(50, 142, 111, 0.28);
+  padding: 12px;
+}
+
+.health-card.warn {
+  border-color: rgba(240, 168, 75, 0.68);
+  background: rgba(109, 70, 22, 0.34);
+}
+
+.health-card.error {
+  border-color: rgba(255, 77, 95, 0.74);
+  background: rgba(105, 27, 48, 0.42);
+}
+
+.health-icon {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--good);
+  color: #07100c;
+  font-size: 0.62rem;
+  font-weight: 950;
+}
+
+.health-card.warn .health-icon {
+  background: var(--warn);
+}
+
+.health-card.error .health-icon {
+  background: var(--bad);
+  color: #fff;
+}
+
+.health-card strong,
+.health-card span {
+  display: block;
+}
+
+.health-card strong {
+  color: var(--ink);
+  font-size: 0.86rem;
+}
+
+.health-card span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.summary-list {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding-left: 18px;
+  color: var(--ink);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.summary-list li::marker {
+  color: var(--accent-2);
 }
 
 @keyframes canvas-breath {

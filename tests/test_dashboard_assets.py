@@ -41,6 +41,9 @@ def test_dashboard_has_operational_control_sections() -> None:
         "evidencePolicy",
         "lastRun",
         "diagnosticsPanel",
+        "summaryPanel",
+        "summaryHealth",
+        "summaryItems",
         "progressSteps",
         "pipelineGraph",
         "bottleneckList",
@@ -54,6 +57,7 @@ def test_dashboard_has_operational_control_sections() -> None:
     for element_id in expected_ids:
         assert f'id="{element_id}"' in html
     assert "How to use this" in html
+    assert "Summary and Recommendations" in html
     assert "info-button" in html
 
 
@@ -65,7 +69,9 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert "window.addEventListener(\"error\"" in script
     assert "window.addEventListener(\"unhandledrejection\"" in script
     assert "metricSeverity" in script
+    assert "summaryRecommendations" in script
     assert ".diagnostics.error" in styles
+    assert ".summary-panel.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles
 

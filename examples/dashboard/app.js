@@ -105,6 +105,8 @@ const output = {
   progressState: document.querySelector("#progressState"),
   progressBar: document.querySelector("#progressBar"),
   progressSteps: document.querySelector("#progressSteps"),
+  simulationCanvas: document.querySelector("#simulationCanvas"),
+  qualityNeedle: document.querySelector("#qualityNeedle"),
   pipelineHealth: document.querySelector("#pipelineHealth"),
   pipelineGraph: document.querySelector("#pipelineGraph"),
   bottleneckList: document.querySelector("#bottleneckList"),
@@ -338,6 +340,80 @@ function updateProgressWindow() {
   } else {
     output.progressState.textContent = progressIndex >= progressSteps.length ? "Complete" : "Running";
   }
+}
+
+function activeSimulationStage() {
+  if (!hasRun) {
+    return -1;
+  }
+  if (progressIndex <= 0) {
+    return 0;
+  }
+  if (progressIndex >= progressSteps.length - 1) {
+    return 5;
+  }
+  return Math.min(progressIndex, 5);
+}
+
+function simulationStageSeverity(stage, state) {
+  if (stage === 2 && state.densityRisk > 0.78) return "error";
+  if (stage === 2 && state.densityRisk > 0.62) return "warn";
+  if (stage === 3 && state.precisionRisk) return "warn";
+  if (stage === 4 && state.conflictRisk) return "error";
+  if (stage === 4 && state.scenario.conflict > 0.5) return "warn";
+  if (stage === 5 && state.severity === "error") return "error";
+  if (stage === 5 && state.severity === "warn") return "warn";
+  return "ok";
+}
+
+function updateSimulationCanvas(state) {
+  const activeStage = activeSimulationStage();
+  output.simulationCanvas.classList.remove("running", "warn", "error");
+  if (hasRun && progressIndex < progressSteps.length) {
+    output.simulationCanvas.classList.add("running");
+  }
+  if (hasRun && state.severity !== "ok") {
+    output.simulationCanvas.classList.add(state.severity);
+  }
+
+  output.simulationCanvas.querySelectorAll(".sim-node").forEach((node) => {
+    const stage = Number.parseInt(node.dataset.stage || "-1", 10);
+    const severity = simulationStageSeverity(stage, state);
+    node.classList.remove("active", "warn", "error", "done");
+    if (hasRun && stage < activeStage) {
+      node.classList.add("done");
+    }
+    if (hasRun && stage === activeStage) {
+      node.classList.add("active");
+    }
+    if (hasRun && severity !== "ok" && stage <= activeStage) {
+      node.classList.add(severity);
+    }
+  });
+
+  const activeLineCount = activeStage < 0 ? 0 : Math.min(activeStage + 1, 6);
+  output.simulationCanvas.querySelectorAll(".flow-line").forEach((line, index) => {
+    line.classList.remove("active", "warn", "error");
+    if (index < activeLineCount) {
+      line.classList.add("active");
+      if (hasRun && state.severity !== "ok" && index >= 3) {
+        line.classList.add(state.severity);
+      }
+    }
+  });
+
+  const documents = output.simulationCanvas.querySelector(".document-stack");
+  documents.classList.remove("active", "warn", "error");
+  if (hasRun && activeStage >= 5) {
+    documents.classList.add("active");
+    if (state.severity !== "ok") {
+      documents.classList.add(state.severity);
+    }
+  }
+
+  const qualityScore = clamp(state.recall * 0.45 + state.precision * 0.35 + state.citation * 0.2, 0, 1);
+  const angle = -58 + qualityScore * 116;
+  output.qualityNeedle.style.transform = `translateX(-50%) rotate(${angle.toFixed(1)}deg)`;
 }
 
 function pipelineStages(state) {
@@ -597,6 +673,7 @@ function render() {
   updateConfigSummary(state);
   updateEventLog();
   updateProgressWindow();
+  updateSimulationCanvas(state);
   updatePipelineView(state);
 }
 

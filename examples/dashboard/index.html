@@ -13,251 +13,208 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero" aria-labelledby="page-title">
+      <header class="console-header" aria-labelledby="page-title">
         <div>
+          <span>Reliable AI retrieval</span>
           <h1 id="page-title">RAGScaleGuard</h1>
-          <p>
-            Run a local retrieval simulation and watch each hardening step update
-            the result.
-          </p>
         </div>
         <div class="run-card" aria-label="Current run summary">
           <span class="label">Run profile</span>
           <strong id="runProfile">Hybrid rerank</strong>
           <span id="runSummary">Local simulation, 80k corpus, top-k 8</span>
         </div>
-      </section>
+      </header>
 
-      <section class="panel guide-panel" aria-labelledby="guide-title">
-        <div class="panel-heading">
-          <div>
-            <h2 id="guide-title">How to use this</h2>
-            <p>Start with the run setup, run the comparison, then read the red or amber areas first.</p>
-          </div>
-          <span>Guide</span>
-        </div>
-        <ol class="guide-steps">
-          <li><strong>Choose a case</strong><span>Select the question type and retriever you want to inspect.</span></li>
-          <li><strong>Set pressure</strong><span>Increase corpus size or reduce top-k to see where retrieval weakens.</span></li>
-          <li><strong>Run comparison</strong><span>Watch the live progress and full pipeline view update stage by stage.</span></li>
-          <li><strong>Act on warnings</strong><span>Use bottlenecks, fix suggestions and candidate evidence to decide the next change.</span></li>
-        </ol>
-      </section>
-
-      <section class="panel quick-start" aria-labelledby="controls-title">
-        <div>
-          <h2 id="controls-title">Run setup <button class="info-button" type="button" aria-label="Run setup help" data-info="Use this area to shape the retrieval scenario before running the pipeline."></button></h2>
-          <p>Pick the scenario, choose the retriever, then run the comparison.</p>
-        </div>
-
-        <div class="control-set">
-          <label for="queryType">Question type <button class="info-button" type="button" aria-label="Question type help" data-info="This changes the kind of answer the retriever must find, such as a deadline, decision or conflict."></button></label>
-          <select id="queryType">
-            <option value="deadline">Specific deadline</option>
-            <option value="decision">Decision source</option>
-            <option value="spec">Technical spec</option>
-            <option value="customer">Customer request</option>
-            <option value="conflict">Conflicting facts</option>
-          </select>
-        </div>
-
-        <div class="control-set">
-          <label for="retriever">Retriever <button class="info-button" type="button" aria-label="Retriever help" data-info="Compare dense, keyword, hybrid and reranked retrieval behaviour under the same scenario."></button></label>
+      <section class="console-frame" aria-label="RAGScaleGuard simulation console">
+        <aside class="setup-rail panel" aria-labelledby="controls-title">
+          <h2 id="controls-title">Setup <button class="info-button" type="button" aria-label="Run setup help" data-info="Shape the retrieval scenario before running the pipeline."></button></h2>
+          <span class="rail-label">Run profile</span>
           <select id="retriever">
             <option value="dense">Dense only</option>
             <option value="bm25">BM25 only</option>
             <option value="hybrid">Hybrid</option>
             <option value="rerank" selected>Hybrid rerank</option>
           </select>
-        </div>
 
-        <div class="control-set">
-          <div class="range-row">
-            <label for="corpusSize">Corpus size <button class="info-button" type="button" aria-label="Corpus size help" data-info="Higher values simulate more documents competing for the same answer slots."></button></label>
-            <output id="corpusSizeValue" for="corpusSize">80k</output>
+          <div class="dial-grid" aria-label="Simulation pressure controls">
+            <div class="dial-card">
+              <div class="dial small"><span></span></div>
+              <strong>Docs</strong>
+            </div>
+            <div class="dial-card primary-dial">
+              <div class="dial large"><span></span></div>
+              <strong>Signals</strong>
+            </div>
+            <div class="dial-card">
+              <div class="dial small"><span></span></div>
+              <strong>Top-k</strong>
+            </div>
           </div>
-          <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
-        </div>
 
-        <div class="control-set compact">
-          <div class="range-row">
-            <label for="topK">Top-k <button class="info-button" type="button" aria-label="Top-k help" data-info="This is how many candidates are allowed through. Too low can miss evidence, too high can reduce precision."></button></label>
-            <output id="topKValue" for="topK">8</output>
+          <div class="control-set">
+            <label for="queryType">Scenario <button class="info-button" type="button" aria-label="Scenario help" data-info="Choose the answer pattern the retriever must find."></button></label>
+            <select id="queryType">
+              <option value="deadline">Specific deadline</option>
+              <option value="decision">Decision source</option>
+              <option value="spec">Technical spec</option>
+              <option value="customer">Customer request</option>
+              <option value="conflict">Conflicting facts</option>
+            </select>
           </div>
-          <input id="topK" type="range" min="1" max="30" step="1" value="8">
-        </div>
 
-        <div class="action-row" aria-label="Run actions">
-          <button id="runComparison" type="button">Run comparison</button>
+          <div class="control-set compact-range">
+            <div class="range-row">
+              <label for="corpusSize">Corpus <button class="info-button" type="button" aria-label="Corpus size help" data-info="Higher values simulate more documents competing for the same answer slots."></button></label>
+              <output id="corpusSizeValue" for="corpusSize">80k</output>
+            </div>
+            <input id="corpusSize" type="range" min="5" max="500" step="5" value="80">
+          </div>
+
+          <div class="control-set compact-range">
+            <div class="range-row">
+              <label for="topK">Top-k <button class="info-button" type="button" aria-label="Top-k help" data-info="How many candidates pass forward. Too low can miss evidence, too high can reduce precision."></button></label>
+              <output id="topKValue" for="topK">8</output>
+            </div>
+            <input id="topK" type="range" min="1" max="30" step="1" value="8">
+          </div>
+
+          <button id="runComparison" type="button">Run simulation</button>
           <button id="resetControls" type="button">Reset</button>
-        </div>
-      </section>
+        </aside>
 
-      <section class="dashboard-grid" aria-label="Dashboard controls and results">
-        <section class="panel progress-panel" aria-labelledby="progress-title">
+        <section class="simulation-panel panel" aria-labelledby="progress-title">
           <div class="panel-heading">
-            <h2 id="progress-title">Live progress <button class="info-button" type="button" aria-label="Live progress help" data-info="This shows the current run moving through each guard stage. Red means the stage found a blocking issue."></button></h2>
+            <h2 id="progress-title">Live Simulation Window <button class="info-button" type="button" aria-label="Live simulation help" data-info="The active stage glows and the flow pulse moves as the run progresses."></button></h2>
             <span id="progressState">Idle</span>
           </div>
           <div class="progress-track" aria-hidden="true">
             <span id="progressBar"></span>
           </div>
+
+          <div id="simulationCanvas" class="simulation-canvas" aria-label="Animated retrieval pipeline">
+            <div class="query-orb sim-node" data-stage="0">
+              <span>Q</span>
+              <strong>Query</strong>
+            </div>
+
+            <div class="source-stack" aria-label="Retrieved sources">
+              <span>Sources</span>
+              <div class="source-dot jira">Jira</div>
+              <div class="source-dot slack">Slack</div>
+              <div class="source-dot confluence">Confluence</div>
+            </div>
+
+            <div class="flow-line line-a"></div>
+            <div class="flow-line line-b"></div>
+            <div class="flow-line line-c"></div>
+            <div class="flow-line line-d"></div>
+            <div class="flow-line line-e"></div>
+            <div class="flow-line line-f"></div>
+
+            <div class="sim-stage normalize sim-node" data-stage="1"><span>Normalise</span></div>
+            <div class="sim-stage density sim-node" data-stage="2"><span>Density</span></div>
+            <div class="sim-stage rerank sim-node" data-stage="3"><span>Rerank</span></div>
+            <div class="sim-stage conflict sim-node" data-stage="4"><span>Conflict gate</span></div>
+            <div class="sim-stage validation sim-node" data-stage="5"><span>Validation gate</span></div>
+            <div class="document-stack" aria-label="Approved context">
+              <div></div><div></div><div></div><div></div>
+            </div>
+          </div>
+
           <ol id="progressSteps" class="progress-window" aria-live="polite"></ol>
+        </section>
+
+        <aside class="right-rail" aria-label="Retrieval results">
+          <section class="panel metrics" aria-labelledby="metrics-title">
+            <div class="panel-heading compact-heading">
+              <h2 id="metrics-title">Retrieval Quality <button class="info-button" type="button" aria-label="Retrieval quality help" data-info="Use these scores to check whether the retriever finds the right evidence."></button></h2>
+              <span>Live</span>
+            </div>
+            <div class="gauge-wrap" aria-hidden="true">
+              <div class="quality-gauge"><span id="qualityNeedle"></span></div>
+            </div>
+            <div class="metric-grid">
+              <article><span>Recall@k</span><strong id="recallValue">0.00</strong><div class="bar"><span id="recallBar"></span></div></article>
+              <article><span>Precision@k</span><strong id="precisionValue">0.00</strong><div class="bar"><span id="precisionBar"></span></div></article>
+              <article><span>Citation accuracy</span><strong id="citationValue">0.00</strong><div class="bar"><span id="citationBar"></span></div></article>
+              <article><span>Density risk</span><strong id="densityValue">Low</strong><div class="bar risk"><span id="densityBar"></span></div></article>
+            </div>
+          </section>
+
+          <section class="panel results" aria-labelledby="results-title">
+            <div class="panel-heading compact-heading">
+              <h2 id="results-title">Candidate Evidence <button class="info-button" type="button" aria-label="Candidate evidence help" data-info="These are the documents the retriever would send towards generation."></button></h2>
+              <span>Ranked</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th scope="col">Rank</th><th scope="col">Source</th><th scope="col">Evidence</th><th scope="col">Score</th></tr></thead>
+                <tbody id="candidateRows"></tbody>
+              </table>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="dashboard-grid" aria-label="Detailed controls and diagnostics">
+        <section class="panel guide-panel" aria-labelledby="guide-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="guide-title">How to use this</h2>
+              <p>Start with setup, run the simulation, then read the red or amber areas first.</p>
+            </div>
+            <span>Guide</span>
+          </div>
+          <ol class="guide-steps">
+            <li><strong>Choose a case</strong><span>Select the question type and retriever you want to inspect.</span></li>
+            <li><strong>Set pressure</strong><span>Increase corpus size or reduce top-k to see where retrieval weakens.</span></li>
+            <li><strong>Run simulation</strong><span>Watch the central window light up stage by stage.</span></li>
+            <li><strong>Act on warnings</strong><span>Use bottlenecks, fix suggestions and evidence to decide the next change.</span></li>
+          </ol>
         </section>
 
         <section class="panel pipeline-panel" aria-labelledby="pipeline-title">
           <div class="panel-heading">
             <div>
-              <h2 id="pipeline-title">Full pipeline view <button class="info-button" type="button" aria-label="Full pipeline view help" data-info="This shows where RAGScaleGuard plugs into an existing retriever and where it allows or blocks model handoff."></button></h2>
+              <h2 id="pipeline-title">Full pipeline view <button class="info-button" type="button" aria-label="Full pipeline view help" data-info="Shows where RAGScaleGuard plugs into an existing retriever and where it allows or blocks model handoff."></button></h2>
               <p>Trace the guard from the existing app through retrieval, diagnosis, LLM gating and logging.</p>
             </div>
             <span id="pipelineHealth">Ready</span>
           </div>
           <div id="pipelineGraph" class="pipeline-graph" aria-live="polite"></div>
           <div class="pipeline-detail-grid">
-            <section aria-labelledby="bottleneck-title">
-              <h3 id="bottleneck-title">Bottlenecks <button class="info-button" type="button" aria-label="Bottlenecks help" data-info="These show which parts are under pressure, such as candidate crowding, rerank work or conflict review."></button></h3>
-              <ul id="bottleneckList" class="bottleneck-list"></ul>
-            </section>
-            <section aria-labelledby="fix-title">
-              <h3 id="fix-title">Fix suggestions <button class="info-button" type="button" aria-label="Fix suggestions help" data-info="These are practical next actions. They can later be expanded by an optional local adviser model."></button></h3>
-              <ul id="fixSuggestions" class="suggestion-list"></ul>
-            </section>
-            <section aria-labelledby="adapter-title">
-              <h3 id="adapter-title">Adapter output <button class="info-button" type="button" aria-label="Adapter output help" data-info="This previews the guard decision an existing RAG or LLM system would receive."></button></h3>
-              <pre id="adapterOutput" class="adapter-output"></pre>
-            </section>
+            <section aria-labelledby="bottleneck-title"><h3 id="bottleneck-title">Bottlenecks <button class="info-button" type="button" aria-label="Bottlenecks help" data-info="Shows which parts are under pressure."></button></h3><ul id="bottleneckList" class="bottleneck-list"></ul></section>
+            <section aria-labelledby="fix-title"><h3 id="fix-title">Fix suggestions <button class="info-button" type="button" aria-label="Fix suggestions help" data-info="Practical next actions for the selected run."></button></h3><ul id="fixSuggestions" class="suggestion-list"></ul></section>
+            <section aria-labelledby="adapter-title"><h3 id="adapter-title">Adapter output <button class="info-button" type="button" aria-label="Adapter output help" data-info="The guard decision an existing RAG or LLM system would receive."></button></h3><pre id="adapterOutput" class="adapter-output"></pre></section>
           </div>
         </section>
 
         <section class="panel adviser-panel" aria-labelledby="adviser-title">
           <div class="panel-heading">
             <div>
-              <h2 id="adviser-title">Local adviser <button class="info-button" type="button" aria-label="Local adviser help" data-info="The adviser is optional. It reads sanitised diagnostics and returns structured advice without changing your system prompt."></button></h2>
+              <h2 id="adviser-title">Local adviser <button class="info-button" type="button" aria-label="Local adviser help" data-info="Optional local model advice. It reads sanitised diagnostics and does not change your system prompt."></button></h2>
               <p>Use a local OpenAI-compatible model to explain problems and propose fixes.</p>
             </div>
             <span id="adviserStatus">Off</span>
           </div>
           <div class="adviser-grid">
-            <section aria-labelledby="adviser-controls-title">
-              <h3 id="adviser-controls-title">Adviser controls</h3>
-              <label for="adviserMode">Mode</label>
-              <select id="adviserMode">
-                <option value="off" selected>Off</option>
-                <option value="explain">Explain only</option>
-                <option value="fix_plan">Fix plan</option>
-                <option value="patch_proposal">Patch proposal</option>
-              </select>
-              <label for="adviserModel">Local model</label>
-              <input id="adviserModel" type="text" value="gemma4:31b" autocomplete="off" spellcheck="false">
-              <button id="runAdviser" type="button">Ask adviser</button>
-            </section>
-            <section aria-labelledby="prompt-safety-title">
-              <h3 id="prompt-safety-title">Prompt safety</h3>
-              <ul class="safety-list">
-                <li>Application system prompt is untouched.</li>
-                <li>Diagnostics are sanitised before model use.</li>
-                <li>Document text is not treated as instruction text.</li>
-                <li>Advice is never auto-applied.</li>
-              </ul>
-            </section>
-            <section aria-labelledby="adviser-output-title">
-              <h3 id="adviser-output-title">Adviser output</h3>
-              <dl class="adviser-output">
-                <div><dt>Problem</dt><dd id="adviserProblem">Adviser is off.</dd></div>
-                <div><dt>Why it matters</dt><dd id="adviserWhy">No model call has been made.</dd></div>
-                <div><dt>Fix</dt><dd id="adviserFix">Turn on explain mode when you want local advice.</dd></div>
-                <div><dt>Risk</dt><dd id="adviserRisk">No external adviser call.</dd></div>
-              </dl>
-            </section>
-          </div>
-        </section>
-
-        <section class="panel metrics" aria-labelledby="metrics-title">
-          <h2 id="metrics-title">Retrieval quality <button class="info-button" type="button" aria-label="Retrieval quality help" data-info="Use these scores to see whether the retriever is finding the right evidence and avoiding irrelevant context."></button></h2>
-          <div class="metric-grid">
-            <article>
-              <span>Recall@k</span>
-              <strong id="recallValue">0.00</strong>
-              <div class="bar"><span id="recallBar"></span></div>
-            </article>
-            <article>
-              <span>Precision@k</span>
-              <strong id="precisionValue">0.00</strong>
-              <div class="bar"><span id="precisionBar"></span></div>
-            </article>
-            <article>
-              <span>Citation accuracy</span>
-              <strong id="citationValue">0.00</strong>
-              <div class="bar"><span id="citationBar"></span></div>
-            </article>
-            <article>
-              <span>Density risk</span>
-              <strong id="densityValue">Low</strong>
-              <div class="bar risk"><span id="densityBar"></span></div>
-            </article>
+            <section aria-labelledby="adviser-controls-title"><h3 id="adviser-controls-title">Adviser controls</h3><label for="adviserMode">Mode</label><select id="adviserMode"><option value="off" selected>Off</option><option value="explain">Explain only</option><option value="fix_plan">Fix plan</option><option value="patch_proposal">Patch proposal</option></select><label for="adviserModel">Local model</label><input id="adviserModel" type="text" value="gemma4:31b" autocomplete="off" spellcheck="false"><button id="runAdviser" type="button">Ask adviser</button></section>
+            <section aria-labelledby="prompt-safety-title"><h3 id="prompt-safety-title">Prompt safety</h3><ul class="safety-list"><li>Application system prompt is untouched.</li><li>Diagnostics are sanitised before model use.</li><li>Document text is not treated as instruction text.</li><li>Advice is never auto-applied.</li></ul></section>
+            <section aria-labelledby="adviser-output-title"><h3 id="adviser-output-title">Adviser output</h3><dl class="adviser-output"><div><dt>Problem</dt><dd id="adviserProblem">Adviser is off.</dd></div><div><dt>Why it matters</dt><dd id="adviserWhy">No model call has been made.</dd></div><div><dt>Fix</dt><dd id="adviserFix">Turn on explain mode when you want local advice.</dd></div><div><dt>Risk</dt><dd id="adviserRisk">No external adviser call.</dd></div></dl></section>
           </div>
         </section>
 
         <section id="diagnosticsPanel" class="panel diagnostics" aria-labelledby="diagnostics-title">
-          <h2 id="diagnostics-title">What to do next <button class="info-button" type="button" aria-label="What to do next help" data-info="This is the main action panel. Start here when a run turns amber or red."></button></h2>
-          <dl>
-            <div>
-              <dt>Top-k status</dt>
-              <dd id="topKStatus">Ready</dd>
-            </div>
-            <div>
-              <dt>Conflict status</dt>
-              <dd id="conflictStatus">Ready</dd>
-            </div>
-            <div>
-              <dt>Recommended action</dt>
-              <dd id="recommendation">Adjust controls to inspect retrieval behaviour.</dd>
-            </div>
-          </dl>
-        </section>
-
-        <section class="panel results" aria-labelledby="results-title">
-          <h2 id="results-title">Candidate evidence <button class="info-button" type="button" aria-label="Candidate evidence help" data-info="These are the documents the retriever would send towards generation. Similar but incomplete evidence is a warning sign."></button></h2>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Source</th>
-                  <th scope="col">Evidence</th>
-                  <th scope="col">Score</th>
-                </tr>
-              </thead>
-              <tbody id="candidateRows"></tbody>
-            </table>
-          </div>
+          <h2 id="diagnostics-title">What to do next <button class="info-button" type="button" aria-label="What to do next help" data-info="Main action panel. Start here when a run turns amber or red."></button></h2>
+          <dl><div><dt>Top-k status</dt><dd id="topKStatus">Ready</dd></div><div><dt>Conflict status</dt><dd id="conflictStatus">Ready</dd></div><div><dt>Recommended action</dt><dd id="recommendation">Adjust controls to inspect retrieval behaviour.</dd></div></dl>
         </section>
 
         <details class="panel advanced-panel">
           <summary>Advanced controls and review <button class="info-button" type="button" aria-label="Advanced controls help" data-info="Use these switches to test metadata, authority, freshness and conflict controls."></button></summary>
           <div class="advanced-grid">
-            <section aria-label="Hardening signals">
-              <h3>Hardening signals <button class="info-button" type="button" aria-label="Hardening signals help" data-info="These controls simulate extra ranking and safety signals used before model generation."></button></h3>
-              <div class="toggle-list">
-                <label><input id="metadata" type="checkbox" checked> Metadata scoring</label>
-                <label><input id="authority" type="checkbox" checked> Authority scoring</label>
-                <label><input id="freshness" type="checkbox" checked> Freshness scoring</label>
-                <label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label>
-              </div>
-            </section>
-            <section aria-labelledby="review-title">
-              <h3 id="review-title">Review queue <button class="info-button" type="button" aria-label="Review queue help" data-info="Items here need attention before trusting the generated answer."></button></h3>
-              <p><strong id="reviewCount">1 item</strong></p>
-              <ul id="reviewItems"></ul>
-            </section>
-            <section aria-labelledby="log-title">
-              <h3 id="log-title">Event log <button class="info-button" type="button" aria-label="Event log help" data-info="This shows recent dashboard events. When served locally, events are also written to the external log file."></button></h3>
-              <p id="lastRun">Not started</p>
-              <p id="evidencePolicy">Cite top candidate and flag conflicts</p>
-              <p>External log: <code>reports/dashboard-events.jsonl</code></p>
-              <ol id="eventLog"></ol>
-            </section>
+            <section aria-label="Hardening signals"><h3>Hardening signals</h3><div class="toggle-list"><label><input id="metadata" type="checkbox" checked> Metadata scoring</label><label><input id="authority" type="checkbox" checked> Authority scoring</label><label><input id="freshness" type="checkbox" checked> Freshness scoring</label><label><input id="conflictGuard" type="checkbox" checked> Conflict guard</label></div></section>
+            <section aria-labelledby="review-title"><h3 id="review-title">Review queue</h3><p><strong id="reviewCount">1 item</strong></p><ul id="reviewItems"></ul></section>
+            <section aria-labelledby="log-title"><h3 id="log-title">Event log</h3><p id="lastRun">Not started</p><p id="evidencePolicy">Cite top candidate and flag conflicts</p><p>External log: <code>reports/dashboard-events.jsonl</code></p><ol id="eventLog"></ol></section>
           </div>
         </details>
       </section>

@@ -71,13 +71,20 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
 
 
 def test_dashboard_has_full_pipeline_visualisation() -> None:
+    html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
     script = (DASHBOARD_DIR / "app.js").read_text(encoding="utf-8")
     styles = (DASHBOARD_DIR / "styles.css").read_text(encoding="utf-8")
 
+    assert "simulationCanvas" in html
+    assert "qualityNeedle" in html
     assert "pipelineStages" in script
     assert "bottlenecks" in script
     assert "fixSuggestions" in script
+    assert "updateSimulationCanvas" in script
     assert "GuardedRetriever(existing_retriever)" in script
+    assert ".simulation-canvas" in styles
+    assert ".flow-line.active::after" in styles
+    assert "pulse-flow" in styles
     assert ".pipeline-graph" in styles
     assert ".pipeline-node.error" in styles
     assert ".bottleneck-meter" in styles

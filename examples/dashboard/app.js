@@ -77,6 +77,9 @@ const controls = {
   runAdviser: document.querySelector("#runAdviser"),
   runComparison: document.querySelector("#runComparison"),
   resetControls: document.querySelector("#resetControls"),
+  detailToggle: document.querySelector("#detailToggle"),
+  knobs: document.querySelectorAll("[data-knob]"),
+  themeDots: document.querySelectorAll("[data-theme-dot]"),
 };
 
 const output = {
@@ -137,6 +140,14 @@ const progressSteps = [
   ["LLM gate", "Approve context or block generation."],
   ["Telemetry", "Persist diagnostics, errors, and review actions."],
 ];
+
+const stageSymbols = new Map([
+  [1, "+"],
+  [2, "▽"],
+  [3, "≡"],
+  [4, "×"],
+  [5, "✓"],
+]);
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -346,6 +357,48 @@ function updateProgressWindow() {
   }
 }
 
+function updateKnobs(state) {
+  controls.knobs.forEach((knob) => {
+    const dial = knob.querySelector(".dial span");
+    if (!dial) return;
+    if (knob.dataset.knob === "docs") {
+      dial.style.setProperty("--turn", `${-58 + (state.corpusSize / 500) * 116}deg`);
+    }
+    if (knob.dataset.knob === "signals") {
+      const enabledSignals = [
+        controls.metadata.checked,
+        controls.authority.checked,
+        controls.freshness.checked,
+        controls.conflictGuard.checked,
+      ].filter(Boolean).length;
+      dial.style.setProperty("--turn", `${-58 + (enabledSignals / 4) * 116}deg`);
+    }
+    if (knob.dataset.knob === "topk") {
+      dial.style.setProperty("--turn", `${-58 + (state.topK / 30) * 116}deg`);
+    }
+  });
+}
+
+function handleKnobPress(event) {
+  const knob = event.currentTarget.dataset.knob;
+  if (knob === "docs") {
+    const current = Number.parseInt(controls.corpusSize.value, 10);
+    controls.corpusSize.value = current >= 500 ? "5" : String(Math.min(500, current + 55));
+  }
+  if (knob === "signals") {
+    const nextValue = !(controls.metadata.checked && controls.authority.checked && controls.freshness.checked);
+    controls.metadata.checked = nextValue;
+    controls.authority.checked = nextValue;
+    controls.freshness.checked = nextValue;
+  }
+  if (knob === "topk") {
+    const current = Number.parseInt(controls.topK.value, 10);
+    controls.topK.value = current >= 30 ? "1" : String(Math.min(30, current + 3));
+  }
+  recordLog("info", "Stack knob changed the simulation profile.", { knob });
+  render();
+}
+
 function activeSimulationStage() {
   if (!hasRun) {
     return -1;
@@ -383,6 +436,7 @@ function updateSimulationCanvas(state) {
   output.simulationCanvas.querySelectorAll(".sim-node").forEach((node) => {
     const stage = Number.parseInt(node.dataset.stage || "-1", 10);
     const severity = simulationStageSeverity(stage, state);
+    const icon = node.matches(".sim-stage") ? node.querySelector("strong") : null;
     node.classList.remove("active", "warn", "error", "done");
     if (hasRun && stage < activeStage) {
       node.classList.add("done");
@@ -392,6 +446,9 @@ function updateSimulationCanvas(state) {
     }
     if (hasRun && severity !== "ok" && stage <= activeStage) {
       node.classList.add(severity);
+    }
+    if (icon && stageSymbols.has(stage)) {
+      icon.textContent = hasRun && severity === "error" && stage <= activeStage ? "×" : stageSymbols.get(stage);
     }
   });
 
@@ -403,6 +460,17 @@ function updateSimulationCanvas(state) {
       if (hasRun && state.severity !== "ok" && index >= 3) {
         line.classList.add(state.severity);
       }
+    }
+  });
+
+  output.simulationCanvas.querySelectorAll(".flow-path").forEach((path) => {
+    const flowStage = Number.parseInt(path.dataset.flow || "0", 10);
+    path.classList.remove("active", "warn", "error");
+    if (hasRun && flowStage <= activeStage) {
+      path.classList.add("active");
+    }
+    if (hasRun && state.severity !== "ok" && flowStage >= 4 && flowStage <= activeStage) {
+      path.classList.add(state.severity);
     }
   });
 
@@ -418,6 +486,7 @@ function updateSimulationCanvas(state) {
   const qualityScore = clamp(state.recall * 0.45 + state.precision * 0.35 + state.citation * 0.2, 0, 1);
   const angle = -58 + qualityScore * 116;
   output.qualityNeedle.style.transform = `translateX(-50%) rotate(${angle.toFixed(1)}deg)`;
+  setSeverity(output.qualityNeedle.closest(".quality-gauge"), state.severity);
 }
 
 function pipelineStages(state) {
@@ -665,6 +734,11 @@ function updateAdviserMode() {
   }
 }
 
+function updateViewMode() {
+  document.body.classList.toggle("details-open", controls.detailToggle.checked);
+  document.body.classList.toggle("console-mode", !controls.detailToggle.checked);
+}
+
 function updateDiagnostics(state) {
   setSeverity(output.diagnosticsPanel, state.severity);
 
@@ -722,6 +796,7 @@ function render() {
   updateProgressWindow();
   updateSimulationCanvas(state);
   updatePipelineView(state);
+  updateKnobs(state);
 }
 
 function resetControls() {
@@ -871,7 +946,17 @@ controls.resetControls.addEventListener("click", resetControls);
 controls.runComparison.addEventListener("click", runComparison);
 controls.adviserMode.addEventListener("input", updateAdviserMode);
 controls.runAdviser.addEventListener("click", runAdviser);
+controls.detailToggle.addEventListener("input", updateViewMode);
+controls.knobs.forEach((knob) => knob.addEventListener("click", handleKnobPress));
+controls.themeDots.forEach((dot) => {
+  dot.addEventListener("click", () => {
+    document.documentElement.style.setProperty("--accent-2", dot.dataset.themeDot);
+    recordLog("info", "Console status colour selected.");
+    render();
+  });
+});
 
 recordLog("info", "Dashboard loaded with local sample state.");
 updateAdviserMode();
+updateViewMode();
 render();

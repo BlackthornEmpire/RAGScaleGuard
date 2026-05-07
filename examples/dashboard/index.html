@@ -11,17 +11,21 @@
     <link rel="stylesheet" href="styles.css">
     <script src="app.js" defer></script>
   </head>
-  <body>
+  <body class="console-mode">
     <main class="app-shell">
       <header class="console-header" aria-labelledby="page-title">
         <div>
-          <span>Reliable AI retrieval</span>
           <h1 id="page-title">RAGScaleGuard</h1>
+          <span>Reliable AI retrieval</span>
         </div>
         <div class="run-card" aria-label="Current run summary">
           <span class="label">Run profile</span>
           <strong id="runProfile">Hybrid rerank</strong>
           <span id="runSummary">Local simulation, 80k corpus, top-k 8</span>
+        </div>
+        <div class="view-toggle" aria-label="Dashboard view mode">
+          <span>View</span>
+          <label><input id="detailToggle" type="checkbox"> Full details</label>
         </div>
       </header>
 
@@ -36,19 +40,20 @@
             <option value="rerank" selected>Hybrid rerank</option>
           </select>
 
+          <span class="dial-label">Stack</span>
           <div class="dial-grid" aria-label="Simulation pressure controls">
-            <div class="dial-card">
+            <button class="dial-card" type="button" data-knob="docs" aria-label="Adjust corpus size">
               <div class="dial small"><span></span></div>
               <strong>Docs</strong>
-            </div>
-            <div class="dial-card primary-dial">
+            </button>
+            <button class="dial-card primary-dial" type="button" data-knob="signals" aria-label="Adjust scoring signals">
               <div class="dial large"><span></span></div>
               <strong>Signals</strong>
-            </div>
-            <div class="dial-card">
+            </button>
+            <button class="dial-card" type="button" data-knob="topk" aria-label="Adjust top-k">
               <div class="dial small"><span></span></div>
               <strong>Top-k</strong>
-            </div>
+            </button>
           </div>
 
           <div class="control-set">
@@ -92,6 +97,21 @@
           </div>
 
           <div id="simulationCanvas" class="simulation-canvas" aria-label="Animated retrieval pipeline">
+            <svg id="pipelineSvg" class="pipeline-svg" viewBox="0 0 1000 360" aria-hidden="true" focusable="false">
+              <path class="flow-path branch source-a" data-flow="0" d="M105 185 C180 115 235 92 315 88"></path>
+              <path class="flow-path branch source-b" data-flow="0" d="M108 186 C190 155 242 142 315 142"></path>
+              <path class="flow-path branch source-c" data-flow="0" d="M108 188 C190 205 242 202 315 198"></path>
+              <path class="flow-path branch source-d" data-flow="0" d="M105 190 C180 250 235 274 315 274"></path>
+              <path class="flow-path main-flow main-a" data-flow="1" d="M342 180 C396 180 408 180 452 180"></path>
+              <path class="flow-path main-flow main-b" data-flow="2" d="M516 180 C548 180 552 180 584 180"></path>
+              <path class="flow-path main-flow main-c" data-flow="3" d="M648 180 C680 180 684 180 716 180"></path>
+              <path class="flow-path main-flow main-d" data-flow="4" d="M780 180 C812 180 816 180 848 180"></path>
+              <path class="flow-path main-flow main-e" data-flow="5" d="M912 180 C938 180 946 180 968 180"></path>
+              <path class="flow-path output out-a" data-flow="5" d="M910 168 C948 98 976 86 998 72"></path>
+              <path class="flow-path output out-b" data-flow="5" d="M912 178 C952 145 978 138 998 132"></path>
+              <path class="flow-path output out-c" data-flow="5" d="M912 190 C952 218 978 226 998 236"></path>
+              <path class="flow-path output out-d" data-flow="5" d="M910 200 C948 270 976 286 998 302"></path>
+            </svg>
             <div class="query-orb sim-node" data-stage="0">
               <span>Q</span>
               <strong>Query</strong>
@@ -99,9 +119,10 @@
 
             <div class="source-stack" aria-label="Retrieved sources">
               <span>Sources</span>
-              <div class="source-dot jira">Jira</div>
-              <div class="source-dot slack">Slack</div>
-              <div class="source-dot confluence">Confluence</div>
+              <div class="source-dot jira"><strong>J</strong><span>Jira</span></div>
+              <div class="source-dot slack"><strong>S</strong><span>Slack</span></div>
+              <div class="source-dot jira-secondary"><strong>J</strong><span>Jira</span></div>
+              <div class="source-dot confluence"><strong>C</strong><span>Confluence</span></div>
             </div>
 
             <div class="flow-line line-a"></div>
@@ -111,11 +132,11 @@
             <div class="flow-line line-e"></div>
             <div class="flow-line line-f"></div>
 
-            <div class="sim-stage normalize sim-node" data-stage="1"><span>Normalise</span></div>
-            <div class="sim-stage density sim-node" data-stage="2"><span>Density</span></div>
-            <div class="sim-stage rerank sim-node" data-stage="3"><span>Rerank</span></div>
-            <div class="sim-stage conflict sim-node" data-stage="4"><span>Conflict gate</span></div>
-            <div class="sim-stage validation sim-node" data-stage="5"><span>Validation gate</span></div>
+            <div class="sim-stage normalize sim-node" data-stage="1"><strong>+</strong><span>Normalise</span></div>
+            <div class="sim-stage density sim-node" data-stage="2"><strong>▽</strong><span>Density</span></div>
+            <div class="sim-stage rerank sim-node" data-stage="3"><strong>≡</strong><span>Rerank</span></div>
+            <div class="sim-stage conflict sim-node" data-stage="4"><strong>×</strong><span>Conflict<br>Gate</span></div>
+            <div class="sim-stage validation sim-node" data-stage="5"><strong>✓</strong><span>Validation<br>Gate</span></div>
             <div class="document-stack" aria-label="Approved context">
               <div></div><div></div><div></div><div></div>
             </div>
@@ -166,6 +187,13 @@
             <ul id="summaryItems" class="summary-list"></ul>
           </section>
         </aside>
+        <div class="palette-control" aria-label="Status colours">
+          <button type="button" data-theme-dot="#ff4d5f" aria-label="Red status"></button>
+          <button type="button" data-theme-dot="#ffc33d" aria-label="Amber status"></button>
+          <button type="button" data-theme-dot="#26df84" aria-label="Green status"></button>
+          <button type="button" data-theme-dot="#0db4ee" aria-label="Cyan status"></button>
+          <button type="button" data-theme-dot="#f4f1ff" aria-label="White status"></button>
+        </div>
       </section>
 
       <section class="dashboard-grid" aria-label="Detailed controls and diagnostics">

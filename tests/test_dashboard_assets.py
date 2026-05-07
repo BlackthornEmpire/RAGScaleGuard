@@ -36,6 +36,8 @@ def test_dashboard_has_operational_control_sections() -> None:
     expected_ids = [
         "runComparison",
         "resetControls",
+        "detailToggle",
+        "pipelineSvg",
         "reviewItems",
         "eventLog",
         "evidencePolicy",
@@ -58,6 +60,9 @@ def test_dashboard_has_operational_control_sections() -> None:
         assert f'id="{element_id}"' in html
     assert "How to use this" in html
     assert "Summary and Recommendations" in html
+    assert "Full details" in html
+    assert "data-knob" in html
+    assert "palette-control" in html
     assert "info-button" in html
 
 
@@ -70,8 +75,13 @@ def test_dashboard_has_severity_and_external_logging_controls() -> None:
     assert "window.addEventListener(\"unhandledrejection\"" in script
     assert "metricSeverity" in script
     assert "summaryRecommendations" in script
+    assert "updateViewMode" in script
+    assert "handleKnobPress" in script
+    assert "stageSymbols" in script
     assert ".diagnostics.error" in styles
     assert ".summary-panel.error" in styles
+    assert ".console-mode .dashboard-grid" in styles
+    assert ".flow-path.error" in styles
     assert ".bar.error span" in styles
     assert ".progress-window .error" in styles
 

@@ -1522,7 +1522,7 @@ summary {
   margin-bottom: 4px;
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1100px) {
   .console-header,
   .console-frame,
   .hero,
@@ -1689,6 +1689,7 @@ h1 {
   grid-template-columns: clamp(190px, 13vw, 255px) minmax(0, 1fr) clamp(290px, 18vw, 365px);
   gap: clamp(10px, 0.8vw, 16px);
   height: clamp(520px, 34vw, 690px);
+  margin-bottom: clamp(82px, 5vw, 116px);
   border-width: 5px;
   border-radius: 18px 18px 26px 26px;
   background:
@@ -1702,11 +1703,16 @@ h1 {
 }
 
 .console-frame::after {
-  left: 39%;
-  right: 39%;
-  bottom: -25px;
-  height: 22px;
+  left: 50%;
+  bottom: clamp(-30px, -1.7vw, -18px);
+  width: clamp(170px, 22vw, 430px);
+  height: clamp(18px, 1.5vw, 28px);
+  border-radius: 0 0 999px 999px;
   background: linear-gradient(90deg, #6e36d2, #a763ff 48%, #3ccbc5);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.42),
+    0 0 22px rgba(67, 207, 208, 0.24);
+  transform: translateX(-50%);
 }
 
 .setup-rail,
@@ -2071,11 +2077,47 @@ h1 {
   overflow: hidden;
 }
 
-.palette-control {
+.palette-dock {
   position: absolute;
-  left: 50%;
-  bottom: -22px;
+  right: clamp(10px, 1vw, 18px);
+  bottom: clamp(-96px, -5.4vw, -72px);
   z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: clamp(8px, 0.8vw, 12px);
+  max-width: min(460px, 40vw);
+}
+
+.palette-info {
+  max-width: clamp(150px, 14vw, 240px);
+  border: 1px solid rgba(126, 240, 223, 0.24);
+  border-radius: 10px;
+  background: rgba(9, 8, 18, 0.92);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+  padding: clamp(8px, 0.65vw, 11px);
+}
+
+.palette-info strong,
+.palette-info span {
+  display: block;
+}
+
+.palette-info strong {
+  color: var(--ink);
+  font-size: clamp(0.68rem, 0.62vw, 0.82rem);
+  font-weight: 950;
+  line-height: 1.1;
+}
+
+.palette-info span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: clamp(0.6rem, 0.54vw, 0.72rem);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.palette-control {
   display: flex;
   gap: clamp(10px, 1vw, 18px);
   align-items: center;
@@ -2083,7 +2125,6 @@ h1 {
   background: rgba(14, 14, 18, 0.94);
   box-shadow: 0 14px 34px rgba(0, 0, 0, 0.46);
   padding: clamp(10px, 0.95vw, 16px) clamp(16px, 1.5vw, 26px);
-  transform: translateX(-50%);
 }
 
 .palette-control button {
@@ -2108,7 +2149,27 @@ h1 {
   }
 }
 
-@media (max-width: 820px) {
+@media (max-width: 1100px) {
+  .guide-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pipeline-graph {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pipeline-node:not(:last-child)::after {
+    display: none;
+  }
+
+  .pipeline-detail-grid,
+  .adviser-grid,
+  .advanced-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1100px) {
   .app-shell {
     width: min(100vw - 20px, 760px);
     padding-top: 18px;
@@ -2198,7 +2259,31 @@ h1 {
     transform: translateX(-50%);
   }
 
+  .console-frame {
+    margin-bottom: 18px;
+  }
+
+  .console-frame::after {
+    bottom: -18px;
+    width: clamp(150px, 42vw, 240px);
+    height: 18px;
+  }
+
+  .palette-dock {
+    position: static;
+    grid-column: 1;
+    flex-direction: column;
+    align-items: stretch;
+    max-width: none;
+    margin-top: 8px;
+  }
+
+  .palette-info {
+    max-width: none;
+    text-align: center;
+  }
+
   .palette-control {
-    display: none;
+    justify-content: center;
   }
 }

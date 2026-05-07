@@ -62,7 +62,9 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "Summary and Recommendations" in html
     assert "Full details" in html
     assert "data-knob" in html
+    assert "palette-info" in html
     assert "palette-control" in html
+    assert "Status colours" in html
     assert "info-button" in html
 
 

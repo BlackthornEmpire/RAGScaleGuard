@@ -115,6 +115,7 @@ const output = {
   progressBar: document.querySelector("#progressBar"),
   progressSteps: document.querySelector("#progressSteps"),
   simulationCanvas: document.querySelector("#simulationCanvas"),
+  pipelineSvg: document.querySelector("#pipelineSvg"),
   qualityNeedle: document.querySelector("#qualityNeedle"),
   pipelineHealth: document.querySelector("#pipelineHealth"),
   pipelineGraph: document.querySelector("#pipelineGraph"),
@@ -130,12 +131,14 @@ const output = {
 };
 
 const logItems = [];
+const svgNamespace = ["http:", "//www.w3.org/2000/svg"].join("");
 let progressIndex = 0;
 let progressTimer = 0;
 let hasRun = false;
 let isStopped = false;
 let activeInfoButton = null;
 let infoTooltipPinned = false;
+let connectorFrame = 0;
 
 const progressSteps = [
   ["Adapter", "Normalise external retriever output."],
@@ -431,8 +434,103 @@ function simulationStageSeverity(stage, state) {
   return "ok";
 }
 
+function relativeRect(element, containerRect) {
+  const rect = element.getBoundingClientRect();
+  return {
+    left: rect.left - containerRect.left,
+    right: rect.right - containerRect.left,
+    top: rect.top - containerRect.top,
+    bottom: rect.bottom - containerRect.top,
+    width: rect.width,
+    height: rect.height,
+    centreX: rect.left - containerRect.left + rect.width / 2,
+    centreY: rect.top - containerRect.top + rect.height / 2,
+  };
+}
+
+function centrePoint(element, containerRect) {
+  const rect = relativeRect(element, containerRect);
+  return { x: rect.centreX, y: rect.centreY };
+}
+
+function sidePoint(element, containerRect, side) {
+  const rect = relativeRect(element, containerRect);
+  return {
+    x: side === "right" ? rect.right : rect.left,
+    y: rect.centreY,
+  };
+}
+
+function connectorCurve(from, to, bend = 0.48) {
+  const distance = Math.abs(to.x - from.x);
+  const control = Math.max(42, distance * bend);
+  return `M${from.x.toFixed(1)} ${from.y.toFixed(1)} C${(from.x + control).toFixed(1)} ${from.y.toFixed(1)} ${(to.x - control).toFixed(1)} ${to.y.toFixed(1)} ${to.x.toFixed(1)} ${to.y.toFixed(1)}`;
+}
+
+function createSvgPath(connector) {
+  const path = document.createElementNS(svgNamespace, "path");
+  path.setAttribute("class", connector.className);
+  path.setAttribute("data-flow", String(connector.flow));
+  path.setAttribute("d", connector.d);
+  return path;
+}
+
+function updateConnectorPaths() {
+  const canvas = output.simulationCanvas;
+  const svg = output.pipelineSvg;
+  if (!canvas || !svg) return;
+
+  const canvasRect = canvas.getBoundingClientRect();
+  const queryTarget = canvas.querySelector(".query-orb span");
+  const sourceTargets = [...canvas.querySelectorAll(".source-dot")];
+  const stageTargets = [...canvas.querySelectorAll(".sim-stage")];
+  const documentTargets = [...canvas.querySelectorAll(".document-stack div")];
+  if (!queryTarget || stageTargets.length === 0) return;
+
+  svg.setAttribute("viewBox", `0 0 ${canvasRect.width.toFixed(1)} ${canvasRect.height.toFixed(1)}`);
+  const query = centrePoint(queryTarget, canvasRect);
+  const firstStage = stageTargets[0];
+  const finalStage = stageTargets.at(-1);
+  const connectors = [];
+
+  sourceTargets.forEach((source, index) => {
+    const sourceCentre = centrePoint(source, canvasRect);
+    connectors.push({
+      className: `flow-path branch source-${index + 1}`,
+      flow: 0,
+      d: connectorCurve(query, sourceCentre, 0.34),
+    });
+    connectors.push({
+      className: `flow-path merge source-merge-${index + 1}`,
+      flow: 1,
+      d: connectorCurve(sourceCentre, sidePoint(firstStage, canvasRect, "left"), 0.42),
+    });
+  });
+
+  stageTargets.slice(0, -1).forEach((stage, index) => {
+    connectors.push({
+      className: `flow-path main-flow main-${index + 1}`,
+      flow: index + 1,
+      d: connectorCurve(sidePoint(stage, canvasRect, "right"), sidePoint(stageTargets[index + 1], canvasRect, "left"), 0.5),
+    });
+  });
+
+  if (finalStage) {
+    documentTargets.forEach((documentNode, index) => {
+      connectors.push({
+        className: `flow-path output output-${index + 1}`,
+        flow: 5,
+        d: connectorCurve(sidePoint(finalStage, canvasRect, "right"), sidePoint(documentNode, canvasRect, "left"), 0.42),
+      });
+    });
+  }
+
+  svg.replaceChildren(...connectors.map(createSvgPath));
+}
+
 function updateSimulationCanvas(state) {
   const activeStage = activeSimulationStage();
+  updateConnectorPaths();
   output.simulationCanvas.classList.remove("running", "warn", "error");
   if (hasRun && !isStopped && progressIndex < progressSteps.length) {
     output.simulationCanvas.classList.add("running");
@@ -987,6 +1085,14 @@ function toggleInfoTooltip(button) {
   showInfoTooltip(button, true);
 }
 
+function scheduleConnectorRefresh() {
+  if (connectorFrame) return;
+  connectorFrame = window.requestAnimationFrame(() => {
+    connectorFrame = 0;
+    render();
+  });
+}
+
 window.addEventListener("error", (event) => {
   recordLog("error", "Unhandled dashboard error.", {
     message: event.message,
@@ -1055,7 +1161,12 @@ window.addEventListener("keydown", (event) => {
   }
 });
 window.addEventListener("resize", () => positionInfoTooltip(activeInfoButton));
+window.addEventListener("resize", scheduleConnectorRefresh);
 window.addEventListener("scroll", () => positionInfoTooltip(activeInfoButton), true);
+if (window.ResizeObserver) {
+  const connectorObserver = new ResizeObserver(scheduleConnectorRefresh);
+  connectorObserver.observe(output.simulationCanvas);
+}
 
 recordLog("info", "Dashboard loaded with local sample state.");
 updateAdviserMode();

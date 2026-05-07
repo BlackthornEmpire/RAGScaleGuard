@@ -98,21 +98,7 @@
           </div>
 
           <div id="simulationCanvas" class="simulation-canvas" aria-label="Animated retrieval pipeline">
-            <svg id="pipelineSvg" class="pipeline-svg" viewBox="0 0 1000 360" aria-hidden="true" focusable="false">
-              <path class="flow-path branch source-a" data-flow="0" d="M105 185 C180 115 235 92 315 88"></path>
-              <path class="flow-path branch source-b" data-flow="0" d="M108 186 C190 155 242 142 315 142"></path>
-              <path class="flow-path branch source-c" data-flow="0" d="M108 188 C190 205 242 202 315 198"></path>
-              <path class="flow-path branch source-d" data-flow="0" d="M105 190 C180 250 235 274 315 274"></path>
-              <path class="flow-path main-flow main-a" data-flow="1" d="M342 180 C396 180 408 180 452 180"></path>
-              <path class="flow-path main-flow main-b" data-flow="2" d="M516 180 C548 180 552 180 584 180"></path>
-              <path class="flow-path main-flow main-c" data-flow="3" d="M648 180 C680 180 684 180 716 180"></path>
-              <path class="flow-path main-flow main-d" data-flow="4" d="M780 180 C812 180 816 180 848 180"></path>
-              <path class="flow-path main-flow main-e" data-flow="5" d="M912 180 C938 180 946 180 968 180"></path>
-              <path class="flow-path output out-a" data-flow="5" d="M910 168 C948 98 976 86 998 72"></path>
-              <path class="flow-path output out-b" data-flow="5" d="M912 178 C952 145 978 138 998 132"></path>
-              <path class="flow-path output out-c" data-flow="5" d="M912 190 C952 218 978 226 998 236"></path>
-              <path class="flow-path output out-d" data-flow="5" d="M910 200 C948 270 976 286 998 302"></path>
-            </svg>
+            <svg id="pipelineSvg" class="pipeline-svg" aria-hidden="true" focusable="false"></svg>
             <div class="query-orb sim-node" data-stage="0">
               <span>Q</span>
               <strong>Query</strong>
@@ -120,25 +106,25 @@
 
             <div class="source-stack" aria-label="Retrieved sources">
               <span>Sources</span>
-              <div class="source-dot jira">
+              <div class="source-dot jira" data-fallback="J">
                 <svg class="source-mark jira-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"></path>
                 </svg>
                 <span>Jira</span>
               </div>
-              <div class="source-dot slack">
+              <div class="source-dot slack" data-fallback="S">
                 <svg class="source-mark slack-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"></path>
                 </svg>
                 <span>Slack</span>
               </div>
-              <div class="source-dot jira-secondary">
+              <div class="source-dot jira-secondary" data-fallback="J">
                 <svg class="source-mark jira-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <path d="M11.571 11.513H0a5.218 5.218 0 0 0 5.232 5.215h2.13v2.057A5.215 5.215 0 0 0 12.575 24V12.518a1.005 1.005 0 0 0-1.005-1.005zm5.723-5.756H5.736a5.215 5.215 0 0 0 5.215 5.214h2.129v2.058a5.218 5.218 0 0 0 5.215 5.214V6.758a1.001 1.001 0 0 0-1.001-1.001zM23.013 0H11.455a5.215 5.215 0 0 0 5.215 5.215h2.129v2.057A5.215 5.215 0 0 0 24 12.483V1.005A1.001 1.001 0 0 0 23.013 0Z"></path>
                 </svg>
                 <span>Jira</span>
               </div>
-              <div class="source-dot confluence">
+              <div class="source-dot confluence" data-fallback="C">
                 <svg class="source-mark confluence-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <path d="M.87 18.257c-.248.382-.53.875-.763 1.245a.764.764 0 0 0 .255 1.04l4.965 3.054a.764.764 0 0 0 1.058-.26c.199-.332.454-.763.733-1.221 1.967-3.247 3.945-2.853 7.508-1.146l4.957 2.337a.764.764 0 0 0 1.028-.382l2.364-5.346a.764.764 0 0 0-.382-1 599.851 599.851 0 0 1-4.965-2.361C10.911 10.97 5.224 11.185.87 18.257zM23.131 5.743c.249-.405.531-.875.764-1.25a.764.764 0 0 0-.256-1.034L18.675.404a.764.764 0 0 0-1.058.26c-.195.335-.451.763-.734 1.225-1.966 3.246-3.945 2.85-7.508 1.146L4.437.694a.764.764 0 0 0-1.027.382L1.046 6.422a.764.764 0 0 0 .382 1c1.039.49 3.105 1.467 4.965 2.361 6.698 3.246 12.392 3.029 16.738-4.04z"></path>
                 </svg>

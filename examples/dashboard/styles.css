@@ -376,6 +376,13 @@ body {
   fill: currentColor;
 }
 
+.source-dot:not(:has(.source-mark))::before {
+  content: attr(data-fallback);
+  color: currentColor;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
 .source-dot.jira,
 .source-dot.jira-secondary {
   color: #4c9cff;
@@ -1897,15 +1904,21 @@ h1 {
 .flow-path {
   fill: none;
   stroke: rgba(129, 114, 220, 0.72);
-  stroke-width: 5;
+  stroke-width: clamp(3px, 0.34vw, 5px);
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 6px rgba(155, 92, 255, 0.42));
   opacity: 0.74;
+  vector-effect: non-scaling-stroke;
 }
 
 .flow-path.branch {
-  stroke-dasharray: 20 18;
+  stroke-dasharray: 16 18;
+}
+
+.flow-path.merge {
+  stroke: rgba(145, 121, 232, 0.76);
+  stroke-dasharray: 18 18;
 }
 
 .flow-path.output,
@@ -2274,7 +2287,6 @@ h1 {
     min-height: 540px;
   }
 
-  .pipeline-svg,
   .flow-line {
     display: none;
   }

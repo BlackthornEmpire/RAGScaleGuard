@@ -64,6 +64,7 @@ def test_dashboard_has_operational_control_sections() -> None:
     assert "Summary and Recommendations" in html
     assert "Full details" in html
     assert "data-knob" in html
+    assert "data-fallback" in html
     assert "source-mark" in html
     assert "M5.042 15.165" in html
     assert "M11.571 11.513" in html
@@ -112,9 +113,16 @@ def test_dashboard_has_full_pipeline_visualisation() -> None:
     assert "bottlenecks" in script
     assert "fixSuggestions" in script
     assert "updateSimulationCanvas" in script
+    assert "updateConnectorPaths" in script
+    assert "ResizeObserver" in script
+    assert "document.createElementNS" in script
+    assert "sourceTargets.forEach" in script
+    assert "documentTargets.forEach" in script
     assert "GuardedRetriever(existing_retriever)" in script
     assert ".simulation-canvas" in styles
     assert ".flow-line.active::after" in styles
+    assert ".flow-path.merge" in styles
+    assert ".source-dot:not(:has(.source-mark))::before" in styles
     assert "pulse-flow" in styles
     assert ".pipeline-graph" in styles
     assert ".pipeline-node.error" in styles

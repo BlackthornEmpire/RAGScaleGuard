@@ -1,14 +1,31 @@
-<p align="center">
-  <img src="examples/dashboard/assets/ragscaleguard-logo-lockup.png" alt="RAGScaleGuard - Reliable AI retrieval" width="560">
+<p align="left">
+  <img src="examples/dashboard/assets/ragscaleguard-logo-lockup.png" alt="RAGScaleGuard - Reliable AI retrieval" width="260">
 </p>
 
 # RAGScaleGuard
 
-RAGScaleGuard is an open-source retrieval hardening toolkit for enterprise RAG. It helps teams diagnose and reduce retrieval collapse caused by dense semantic neighbourhoods, near-duplicates, stale documents, fragmented sources, and conflicting internal knowledge.
+**Open-source retrieval diagnostics for enterprise RAG systems.**
 
-The RAGScaleGuard name, shield logo, cube/orbit mark, and "Reliable AI retrieval" lock-up are official project branding. See [TRADEMARKS.md](TRADEMARKS.md) before redistributing modified versions or using the marks outside this project.
+RAGScaleGuard helps teams diagnose retrieval failure before the LLM generates an answer.
 
-It is a practical framework for comparing retrieval strategies, finding why top-k failed, and producing auditable reports at enterprise-like scale.
+It is built for cases where the right document exists, but gets pushed out by dense semantic crowding, stale notes, weak metadata, duplicated documents, or conflicting internal knowledge.
+
+It is a practical framework for comparing retrieval strategies, finding why top-k failed, testing existing RAG systems, and producing auditable reports at enterprise-like scale.
+
+## Quick Start
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+python examples/minimal_local_demo.py
+```
+
+To test the bundled existing-system fixture:
+
+```bash
+ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
+```
 
 ## What It Does
 
@@ -158,6 +175,27 @@ You can also put the same settings in a config file:
 ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
 ```
 
+## How Is This Different From RAG Evaluation Tools?
+
+RAGScaleGuard is not a replacement for Ragas, DeepEval, LangSmith, Phoenix, or Langfuse.
+
+Those tools are strong for evaluation, tracing, and observability.
+
+RAGScaleGuard focuses on a narrower problem:
+
+**Why did retrieval fail before the LLM generated an answer?**
+
+It is designed to inspect retrieval failure modes such as:
+
+- Top-k displacement.
+- Dense semantic crowding.
+- Stale or low-authority evidence.
+- Conflicting documents.
+- Metadata and freshness failures.
+- Unsafe context passed to generation.
+
+It can be used alongside existing evaluation and observability tools.
+
 ## Dashboard Demo
 
 Open `examples/dashboard/index.html` in a browser to try a local interactive dashboard. It uses static sample values, local JavaScript, and no external network calls.
@@ -215,3 +253,9 @@ Expected question fields are `id`, `question`, and optional `ground_truth_docume
 - Large-corpus performance depends on the backing retriever, vector store, and endpoint used by integrators.
 
 See [docs/architecture.md](docs/architecture.md), [docs/integrations.md](docs/integrations.md), [docs/evaluation_methodology.md](docs/evaluation_methodology.md), [docs/limitations.md](docs/limitations.md), and [docs/security_governance.md](docs/security_governance.md).
+
+## Licence and Trademarks
+
+RAGScaleGuard is released under the MIT licence.
+
+The RAGScaleGuard name, shield logo, cube/orbit mark, and "Reliable AI retrieval" lock-up are official project branding. See [TRADEMARKS.md](TRADEMARKS.md) before redistributing modified versions or using the marks outside this project.

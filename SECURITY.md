@@ -28,6 +28,7 @@ Security boundaries expected from integrators:
 - Do not send raw documents, prompts, reports, or traces to hosted evaluators without explicit approval.
 - Apply access control, audit logging, retention, and deletion policies in the host platform.
 - Treat generated Markdown/JSON reports as sensitive artefacts.
+- Treat diagnostic artefacts as sensitive because they can expose document IDs, source relationships, ranking metadata, and internal failure modes.
 
 ## Built-In Controls
 
@@ -35,6 +36,7 @@ Security boundaries expected from integrators:
 - Markdown reports escape corpus-controlled fields to reduce report injection risk.
 - The default package has no network dependencies.
 - The model reranker is only an adapter and does not call external services unless an integrator supplies one.
+- Diagnostic artefacts are structured so teams can review or redact them before exporting to observability, ticketing, or adviser systems.
 
 ## Known Non-Goals
 
@@ -42,3 +44,5 @@ Security boundaries expected from integrators:
 - Hosted API security
 - Key management
 - Policy enforcement across external vector stores or model providers
+- Full data loss prevention or PII classification
+- Automatic security approval for third-party adviser models

@@ -52,3 +52,18 @@ The first-class failure modes are:
 - `missing_citation_support`
 
 This changes the framework from only reporting that retrieval degraded to explaining which enterprise risk was found and what evidence caused the guard to flag it.
+
+## Report Flow
+
+1. The adapter normalises retrieved candidates into `SearchResult`.
+2. The guard or evaluation runner calls enterprise risk diagnostics.
+3. Each high-risk finding becomes a `DiagnosticArtifact`.
+4. Artefacts are attached to guard decisions and evaluation runs.
+5. Markdown and JSON reports serialise the artefacts for review.
+6. The dashboard full-details view shows the same failure modes visually.
+
+See [reporting_schema.md](reporting_schema.md) for the report fields and [enterprise_risk_diagnostics.md](enterprise_risk_diagnostics.md) for the failure-mode behaviour.
+
+## Roadmap Link
+
+The current roadmap is tracked in [roadmap.md](roadmap.md). It prioritises enterprise failure modes that can create confident but unsupported answers before lower-risk ranking refinements.

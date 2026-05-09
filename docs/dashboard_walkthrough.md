@@ -48,3 +48,11 @@ The adviser is off by default. When enabled by the local server configuration, i
 ![Mobile dashboard view](assets/screenshots/dashboard-mobile.png)
 
 The same controls collapse into a single-column layout for smaller screens.
+
+## Reading Enterprise Risk Artefacts
+
+The enterprise risk artefacts panel is the main investigation surface for confident but unsupported answers.
+
+Read it before tuning cosmetic metrics. A red or amber artefact usually means the system should change retrieval, reranking, context packaging, or citation checks before generation.
+
+The panel mirrors the code-level diagnostic artefacts described in [enterprise_risk_diagnostics.md](enterprise_risk_diagnostics.md).

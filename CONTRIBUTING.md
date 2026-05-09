@@ -12,11 +12,16 @@ Good areas for contribution:
 - Vector database examples.
 - Reranking diagnostics.
 - Conflict detection improvements.
+- Stale evidence and authority scoring improvements.
+- Source fragmentation examples.
+- Citation support evaluators.
+- Diagnostic artefact exporters.
 - Authority and freshness scoring.
 - Dashboard improvements.
 - Enterprise-style JSONL fixtures.
 - Retrieval benchmark examples.
 - Documentation and tutorials.
+- Roadmap items in `docs/roadmap.md`.
 
 ## How to Contribute
 
@@ -25,6 +30,18 @@ Good areas for contribution:
 3. Add tests where possible.
 4. Run the test suite.
 5. Open a pull request explaining the change.
+
+## Diagnostic Contributions
+
+For new or changed enterprise risk diagnostics, please include:
+
+- the failure mode being detected
+- the metadata needed for the detector to work well
+- a fixture showing the failure
+- a test covering the expected artefact
+- documentation updates in `docs/enterprise_risk_diagnostics.md` or `docs/reporting_schema.md`
+
+Diagnostics should produce explainable artefacts rather than only changing a score.
 
 ## Reporting Issues
 

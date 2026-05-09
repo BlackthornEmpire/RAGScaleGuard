@@ -9,6 +9,7 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 - Do not log raw document text in CI.
 - Redact reports before sharing outside the authorised team.
 - Treat document IDs as sensitive when they encode customer names, ticket IDs, employee names, or repository paths.
+- Treat diagnostic artefacts as sensitive because they can expose ranking decisions, source relationships, document freshness, and authority signals.
 
 ## Governance Controls The Toolkit Should Support
 
@@ -16,6 +17,8 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 - Freshness scoring: current artefacts should be preferred where facts change over time.
 - Metadata-aware constraints: project, customer, source type, date, owner, and department should be usable as retrieval signals.
 - Conflict detection: contradictory evidence should be surfaced rather than hidden behind a single generated answer.
+- Citation support checks: generated claims should not be returned when citations do not support them.
+- Diagnostic artefacts: high-risk findings should explain why the guard flagged the case and which evidence was involved.
 - Auditability: reports should show which retrieval strategy produced which evidence set.
 - Evaluation integrity: held-out evaluation data must not be used for model training.
 
@@ -28,3 +31,7 @@ RAGScaleGuard handles the kind of data that enterprises normally classify as con
 - Pass adapter secrets through environment variables rather than committed config files.
 - Record corpus version, corpus size, retriever settings, embedding model, reranker model, and top-k.
 - Review report artefacts before publishing external summaries or case studies.
+- Decide whether diagnostic artefacts may be exported to third-party observability, ticketing, or adviser tools.
+- Redact or hash sensitive document IDs before sharing reports outside the authorised team.
+
+See [reporting_schema.md](reporting_schema.md) for the report and artefact fields that should be reviewed during export approval.

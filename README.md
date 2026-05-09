@@ -175,13 +175,27 @@ ragscaleguard-test \
   --report reports/exported-runs.md
 ```
 
-See [docs/integrations.md](docs/integrations.md) for the full adapter guide.
+See [docs/integrations.md](docs/integrations.md) for the full adapter guide, [docs/enterprise_risk_diagnostics.md](docs/enterprise_risk_diagnostics.md) for the diagnostic artefact guide, and [docs/reporting_schema.md](docs/reporting_schema.md) for the report schema.
 
 You can also put the same settings in a config file:
 
 ```bash
 ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
 ```
+
+## Enterprise Risk Diagnostics
+
+RAGScaleGuard now treats the highest-risk enterprise retrieval failures as first-class findings, not only as score changes.
+
+It can flag:
+
+- Conflicting internal records.
+- Stale documents outranking current evidence.
+- Source fragmentation across chunks or systems.
+- Low-authority evidence outranking approved sources.
+- Missing citation support for generated claims.
+
+These findings produce diagnostic artefacts that explain what was retrieved, what was expected where available, why the guard flagged the case, and what should be checked next.
 
 ## How Is This Different From RAG Evaluation Tools?
 
@@ -233,7 +247,7 @@ Broken or risky stages turn red automatically, including the progress bar, affec
 
 ![Blocked retrieval state](docs/assets/screenshots/dashboard-risk-state.png)
 
-Full details mode exposes the operational view used for investigation: stage status, bottlenecks, fix suggestions, adapter output, adviser controls, review toggles, and the local event log.
+Full details mode exposes the operational view used for investigation: stage status, bottlenecks, fix suggestions, enterprise risk artefacts, adapter output, adviser controls, review toggles, and the local event log.
 
 ![Full details dashboard](docs/assets/screenshots/dashboard-full-details.png)
 
@@ -258,11 +272,12 @@ Expected question fields are `id`, `question`, and optional `ground_truth_docume
 
 - The built-in dense retriever is a deterministic hashing baseline for reproducible tests, not a production embedding model.
 - Conflict detection is conservative and rule-based.
+- Citation support and source fragmentation diagnostics improve when questions include expected source IDs, cited document IDs, or generated claims.
 - Generated-answer faithfulness is represented by citation and retrieval metrics until a user supplies an evaluator.
 - RAGScaleGuard does not auto-discover private enterprise auth, schemas, prompts, or vector stores. Teams connect through the adapter contract, HTTP endpoint, or JSONL export.
 - Large-corpus performance depends on the backing retriever, vector store, and endpoint used by integrators.
 
-See [docs/architecture.md](docs/architecture.md), [docs/integrations.md](docs/integrations.md), [docs/evaluation_methodology.md](docs/evaluation_methodology.md), [docs/limitations.md](docs/limitations.md), and [docs/security_governance.md](docs/security_governance.md).
+See [docs/architecture.md](docs/architecture.md), [docs/integrations.md](docs/integrations.md), [docs/enterprise_risk_diagnostics.md](docs/enterprise_risk_diagnostics.md), [docs/reporting_schema.md](docs/reporting_schema.md), [docs/evaluation_methodology.md](docs/evaluation_methodology.md), [docs/limitations.md](docs/limitations.md), [docs/security_governance.md](docs/security_governance.md), and [docs/roadmap.md](docs/roadmap.md).
 
 ## Licence and Trademarks
 

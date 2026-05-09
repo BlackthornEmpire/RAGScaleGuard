@@ -36,7 +36,11 @@ results = retriever.search("What is the approved deadline?", top_k=10)
 decision = guard_retrieval("What is the approved deadline?", results)
 
 if decision.should_block_generation:
-    return {"error": "Retrieval failed guard checks", "issues": decision.issues}
+    return {
+        "error": "Retrieval failed guard checks",
+        "issues": decision.issues,
+        "diagnostic_artifacts": decision.diagnostic_artifacts,
+    }
 
 answer = llm.generate(context="\n\n".join(decision.approved_context))
 ```
@@ -180,9 +184,42 @@ RAGScaleGuard accepts common field names:
 - Score: `score`.
 - Metadata: `metadata`, or top-level fields such as `source_type`, `updated_at`, `status`, `project`, `customer`, and `department`.
 
+## Fields That Improve Enterprise Risk Diagnostics
+
+Basic retrieval tests only need candidate IDs, text, and scores. Enterprise risk diagnostics become more useful when your integration also supplies source metadata and answer support metadata.
+
+Recommended document metadata:
+
+- `source_type`
+- `status`
+- `updated_at`
+- `created_at`
+- `is_verified`
+- `project`
+- `customer`
+- `ticket_id`
+- `department`
+- `author`
+
+Recommended question metadata:
+
+- `ground_truth_document_ids`
+- `expected_source_ids`
+- `expected_document_ids`
+- `required_source_ids`
+- `cited_document_ids`
+- `citation_document_ids`
+- `generated_claims`
+- `answer_claims`
+
+These fields let RAGScaleGuard emit stronger diagnostic artefacts for stale evidence, source fragmentation, authority failures, and weak citation support.
+
+See [enterprise_risk_diagnostics.md](enterprise_risk_diagnostics.md) and [reporting_schema.md](reporting_schema.md) for the full artefact contract.
+
 ## Security Notes
 
 - Keep retrieval endpoints internal unless they are separately authenticated and authorised.
 - Pass secrets through environment variables, not committed files.
 - Do not send raw enterprise documents to an external adviser model.
 - Use JSONL export when a production system cannot safely expose a live endpoint.
+- Treat diagnostic artefacts as sensitive because they can expose document IDs, source relationships, ranking metadata, and internal failure modes.

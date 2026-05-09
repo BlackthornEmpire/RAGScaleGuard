@@ -135,6 +135,7 @@ const output = {
   pipelineGraph: document.querySelector("#pipelineGraph"),
   bottleneckList: document.querySelector("#bottleneckList"),
   fixSuggestions: document.querySelector("#fixSuggestions"),
+  enterpriseRiskList: document.querySelector("#enterpriseRiskList"),
   adapterOutput: document.querySelector("#adapterOutput"),
   adviserStatus: document.querySelector("#adviserStatus"),
   adviserProblem: document.querySelector("#adviserProblem"),
@@ -727,6 +728,59 @@ function fixSuggestions(state) {
   return suggestions;
 }
 
+function enterpriseRiskArtifacts(state) {
+  const artifacts = [];
+  if (state.scenario.conflict > 0.5) {
+    artifacts.push([
+      "conflicting_internal_records",
+      controls.conflictGuard.checked ? "warn" : "error",
+      "Conflicting internal records",
+      "Two sources can answer the same question differently. The guard should surface the conflict before generation.",
+    ]);
+  }
+  if (controls.queryType.value === "decision" || state.densityRisk > 0.68) {
+    artifacts.push([
+      "stale_document",
+      state.densityRisk > 0.72 ? "error" : "warn",
+      "Stale document outranking current evidence",
+      "A semantically similar old note can beat the current approved source unless freshness is used.",
+    ]);
+  }
+  if (state.topKStress || ["customer", "decision"].includes(controls.queryType.value)) {
+    artifacts.push([
+      "source_fragmentation",
+      state.topKStress ? "error" : "warn",
+      "Source fragmentation",
+      "The complete answer may need several chunks across email, tickets, documents, and transcripts.",
+    ]);
+  }
+  if (state.precision < 0.68 || !controls.authority.checked) {
+    artifacts.push([
+      "authority_scoring_failure",
+      !controls.authority.checked ? "error" : "warn",
+      "Authority scoring failure",
+      "Informal evidence can outrank a canonical document when authority is not applied during reranking.",
+    ]);
+  }
+  if (state.citation < 0.7 || state.severity !== "ok") {
+    artifacts.push([
+      "missing_citation_support",
+      state.citation < 0.58 || state.severity === "error" ? "error" : "warn",
+      "Missing citation support",
+      "The generator may cite a retrieved chunk that does not actually support the answer claim.",
+    ]);
+  }
+  if (artifacts.length === 0) {
+    artifacts.push([
+      "clear",
+      "ok",
+      "No high-risk artefact",
+      "Current settings have enough evidence quality for this simulation.",
+    ]);
+  }
+  return artifacts;
+}
+
 function summaryRecommendations(state) {
   const items = [];
   if (state.densityRisk > 0.72) {
@@ -820,10 +874,27 @@ function updatePipelineView(state) {
     output.fixSuggestions.append(li);
   });
 
+  output.enterpriseRiskList.replaceChildren();
+  enterpriseRiskArtifacts(state).forEach(([mode, severity, title, body]) => {
+    const li = document.createElement("li");
+    const strong = document.createElement("strong");
+    const code = document.createElement("code");
+    const span = document.createElement("span");
+    strong.textContent = title;
+    code.textContent = mode;
+    span.textContent = body;
+    li.className = severity;
+    li.append(strong, code, span);
+    output.enterpriseRiskList.append(li);
+  });
+
   output.adapterOutput.textContent = JSON.stringify(
     {
       severity: state.severity,
       block_generation: state.severity === "error",
+      diagnostic_artefacts: enterpriseRiskArtifacts(state)
+        .filter(([mode]) => mode !== "clear")
+        .map(([mode, severity, title]) => ({ failure_mode: mode, severity, title })),
       approved_context: state.severity === "error" ? "hold_for_review" : "ready",
       adapter: "GuardedRetriever(existing_retriever)",
       model_handoff: state.severity === "error" ? "blocked" : "allowed",

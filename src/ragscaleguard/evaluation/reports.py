@@ -45,7 +45,30 @@ def to_markdown(run: EvaluationRun) -> str:
             lines.append(f"- `{markdown_escape(conflict.field)}` conflict: {values}")
     else:
         lines.append("- None detected.")
-    return "\n".join(lines) + "\n"
+    lines.extend(["", "## Diagnostic Artefacts", ""])
+    if run.artifacts:
+        for artifact in run.artifacts:
+            lines.extend(
+                [
+                    f"### {markdown_escape(artifact.title)}",
+                    "",
+                    f"- Query: `{markdown_escape(artifact.query_id)}`",
+                    f"- Failure mode: `{markdown_escape(artifact.failure_mode)}`",
+                    f"- Severity: `{markdown_escape(artifact.severity)}`",
+                    f"- Reason: {markdown_escape(artifact.reason, max_length=500)}",
+                    "- Expected source set: "
+                    + _inline_list(artifact.expected_source_ids, empty_value="not supplied"),
+                    "- Retrieved source set: "
+                    + _inline_list(artifact.retrieved_source_ids, empty_value="none"),
+                    "- Supporting documents: "
+                    + _inline_list(artifact.supporting_document_ids, empty_value="none"),
+                    f"- Remediation: {markdown_escape(artifact.suggested_remediation, max_length=500)}",
+                    "",
+                ]
+            )
+    else:
+        lines.append("- None detected.")
+    return redact_secrets("\n".join(lines) + "\n")
 
 
 def comparison_to_markdown(comparison: ComparisonRun) -> str:
@@ -70,3 +93,9 @@ def comparison_to_markdown(comparison: ComparisonRun) -> str:
     if best is not None:
         lines.extend(["", f"Best by recall@k: `{markdown_escape(best.name)}`"])
     return "\n".join(lines) + "\n"
+
+
+def _inline_list(values: tuple[str, ...], *, empty_value: str) -> str:
+    if not values:
+        return markdown_escape(empty_value)
+    return ", ".join(f"`{markdown_escape(value)}`" for value in values)

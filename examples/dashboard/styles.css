@@ -1216,7 +1216,8 @@ summary:focus-visible {
 
 .pipeline-node strong,
 .bottleneck-list strong,
-.suggestion-list strong {
+.suggestion-list strong,
+.risk-artifact-list strong {
   display: block;
   color: var(--ink);
 }
@@ -1258,13 +1259,14 @@ summary:focus-visible {
 
 .pipeline-detail-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.05fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-top: 14px;
 }
 
 .bottleneck-list,
-.suggestion-list {
+.suggestion-list,
+.risk-artifact-list {
   display: grid;
   gap: 10px;
   margin: 12px 0 0;
@@ -1274,6 +1276,7 @@ summary:focus-visible {
 
 .bottleneck-list li,
 .suggestion-list li,
+.risk-artifact-list li,
 .adapter-output {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1282,20 +1285,35 @@ summary:focus-visible {
 }
 
 .bottleneck-list li,
-.suggestion-list li {
+.suggestion-list li,
+.risk-artifact-list li {
   padding: 11px;
   line-height: 1.4;
 }
 
 .bottleneck-list li.warn,
-.suggestion-list li.warn {
+.suggestion-list li.warn,
+.risk-artifact-list li.warn {
   border-color: var(--warn);
 }
 
 .bottleneck-list li.error,
-.suggestion-list li.error {
+.suggestion-list li.error,
+.risk-artifact-list li.error {
   border-color: var(--bad);
   background: var(--bad-soft);
+}
+
+.risk-artifact-list code {
+  display: inline-block;
+  margin: 7px 0;
+  color: #7de5dd;
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.risk-artifact-list span {
+  display: block;
 }
 
 .bottleneck-meter {

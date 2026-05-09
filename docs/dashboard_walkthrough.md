@@ -32,6 +32,7 @@ Full details mode adds the operational panels:
 - Full pipeline view shows every guard stage and its current state.
 - Bottlenecks identify where retrieval quality is being lost.
 - Fix suggestions explain the next practical correction.
+- Enterprise risk artefacts show named high-risk findings such as conflicting records, stale evidence, source fragmentation, authority failures, and weak citation support.
 - Adapter output shows the structured hand-off expected by an existing retriever.
 - Local adviser can explain diagnostics through an opt-in local model endpoint.
 - Review controls and event logs make the run auditable.

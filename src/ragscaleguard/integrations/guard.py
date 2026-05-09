@@ -6,6 +6,10 @@ from typing import Literal
 
 from ragscaleguard.diagnostics.conflict_detection import detect_conflicts
 from ragscaleguard.diagnostics.density import CorpusDensityAnalyser
+from ragscaleguard.diagnostics.enterprise_risks import (
+    DiagnosticArtifact,
+    diagnose_enterprise_risks,
+)
 from ragscaleguard.models import Query, SearchResult
 from ragscaleguard.scoring.authority import authority_score
 from ragscaleguard.scoring.freshness import freshness_score
@@ -38,6 +42,7 @@ class GuardDecision:
     should_block_generation: bool
     approved_results: tuple[SearchResult, ...]
     issues: tuple[GuardIssue, ...]
+    diagnostic_artifacts: tuple[DiagnosticArtifact, ...]
     suggestions: tuple[str, ...]
     stages: tuple[PipelineStage, ...]
 
@@ -57,6 +62,7 @@ def guard_retrieval(
     normalised_query = query if isinstance(query, Query) else Query("ad-hoc", query)
     result_tuple = tuple(results)
     issues: list[GuardIssue] = []
+    diagnostic_artifacts = diagnose_enterprise_risks(normalised_query, result_tuple)
 
     density_risk = _density_risk(result_tuple)
     if density_risk >= 0.72:
@@ -107,6 +113,8 @@ def guard_retrieval(
             )
         )
 
+    _append_artifact_issues(issues, diagnostic_artifacts)
+
     approved = _approved_results(result_tuple, min_authority=min_authority)
     if not approved:
         issues.append(
@@ -128,6 +136,7 @@ def guard_retrieval(
         should_block_generation=should_block,
         approved_results=tuple(approved),
         issues=tuple(issues),
+        diagnostic_artifacts=diagnostic_artifacts,
         suggestions=tuple(suggestions),
         stages=_stages(issue_severity, tuple(issues), should_block),
     )
@@ -186,6 +195,39 @@ def _suggestions(
     return [*base, *provided]
 
 
+def _append_artifact_issues(
+    issues: list[GuardIssue],
+    artifacts: Sequence[DiagnosticArtifact],
+) -> None:
+    existing = {(issue.stage, issue.title) for issue in issues}
+    for artifact in artifacts:
+        stage = _artifact_stage(artifact)
+        severity: Severity = artifact.severity
+        key = (stage, artifact.title)
+        if key in existing:
+            continue
+        issues.append(
+            GuardIssue(
+                stage=stage,
+                severity=severity,
+                title=artifact.title,
+                detail=artifact.reason,
+                suggestion=artifact.suggested_remediation,
+            )
+        )
+        existing.add(key)
+
+
+def _artifact_stage(artifact: DiagnosticArtifact) -> str:
+    return {
+        "conflicting_internal_records": "Conflict gate",
+        "stale_document": "Freshness check",
+        "source_fragmentation": "Retrieve",
+        "authority_scoring_failure": "Authority check",
+        "missing_citation_support": "Citation gate",
+    }[artifact.failure_mode]
+
+
 def _stages(
     severity: Severity,
     issues: Sequence[GuardIssue],
@@ -197,7 +239,9 @@ def _stages(
         "Retrieve",
         "Rerank",
         "Authority check",
+        "Freshness check",
         "Conflict gate",
+        "Citation gate",
         "LLM gate",
         "Telemetry",
     )

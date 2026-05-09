@@ -10,7 +10,7 @@ RAGScaleGuard helps teams diagnose retrieval failure before the LLM generates an
 
 It is built for cases where the right document exists, but gets pushed out by dense semantic crowding, stale notes, weak metadata, duplicated documents, or conflicting internal knowledge.
 
-It is a practical framework for comparing retrieval strategies, finding why top-k failed, testing existing RAG systems, and producing auditable reports at enterprise-like scale.
+It is a practical framework for comparing retrieval strategies, finding why top-k failed, testing existing RAG systems, and producing auditable risk artefacts at enterprise-like scale.
 
 ## Quick Start
 
@@ -34,6 +34,12 @@ ragscaleguard-test --config configs/ragscaleguard-jsonl.example.json
 - Provides authority, freshness, and metadata scoring primitives.
 - Detects simple factual conflicts across retrieved evidence.
 - Diagnoses cases where the answer document exists but was pushed out of top-k.
+- Emits structured diagnostic artefacts for high-risk enterprise failures:
+  - conflicting internal records
+  - stale documents outranking current evidence
+  - source fragmentation across chunks or systems
+  - low-authority evidence outranking canonical sources
+  - citations that do not support generated claims
 - Tests existing RAG systems through Python adapters, HTTP retrieval endpoints, or exported JSONL runs.
 - Includes adapters for common LangChain, LlamaIndex, Haystack, generic retriever, HTTP, and JSONL shapes.
 - Produces JSON and Markdown evaluation reports.
@@ -97,6 +103,8 @@ decision = guarded.search("What is the approved deadline?", top_k=10)
 ```
 
 The guard returns pipeline stages, blocking issues, approved context, and fix suggestions. A custom suggestion provider can be attached when teams want model-generated remediation advice.
+
+Every high-risk finding can include a diagnostic artefact with the query, expected source set, retrieved source set, candidate scores, ranking metadata, freshness signals, authority signals, conflict reason, and suggested remediation.
 
 ### Framework Adapters
 
@@ -191,6 +199,8 @@ It is designed to inspect retrieval failure modes such as:
 - Dense semantic crowding.
 - Stale or low-authority evidence.
 - Conflicting documents.
+- Source fragmentation.
+- Missing citation support.
 - Metadata and freshness failures.
 - Unsafe context passed to generation.
 

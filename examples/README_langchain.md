@@ -2,9 +2,11 @@
 
 This example demonstrates how to integrate an existing `LangChain` retriever with `RAGScaleGuard` to run diagnostics and generate evaluation reports.
 
-## Prerequisites
+## Running the Example
 
-To run this example, you need to install the optional dependencies. It uses `FAISS` and `FakeEmbeddings` to simulate a local vector store without requiring any API keys.
+To run this example, install the package in editable mode along with the optional dependencies, then execute the script:
 
 ```bash
+pip install -e .
 pip install langchain langchain-community faiss-cpu
+python examples/langchain_end_to_end.py

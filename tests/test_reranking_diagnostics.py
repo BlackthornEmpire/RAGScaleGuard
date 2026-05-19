@@ -81,12 +81,12 @@ def test_reranking_promotes_canonical_evidence() -> None:
 def test_reranking_cannot_recover_unretrieved_evidence() -> None:
     # Setup test case for top-k displacement failure
     documents = [
-        Document(f"noise{i}", "What is override code? Routine log.", {"status": "approved"})
+        Document(f"noise{i}", "What is the SLA escalation policy? Routine ticket.", {"status": "approved"})
         for i in range(5)
-    ] + [Document("override", "Override code is 99382.", {"status": "approved"})]
+    ] + [Document("sla-policy", "Enterprise SLA escalation after 2 hours.", {"status": "approved"})]
 
     queries = [
-        Query("q2", "What is override code?", ground_truth_document_ids=("override",))
+        Query("q2", "What is the SLA escalation policy?", ground_truth_document_ids=("sla-policy",))
     ]
 
     retrievers = {
@@ -98,5 +98,5 @@ def test_reranking_cannot_recover_unretrieved_evidence() -> None:
 
     # In baseline, noise documents occupy top 5 slots
     assert comparison.runs[0].metrics.recall_at_k == 0.0
-    # Because 'override' is outside the candidate multiplier pool, reranking cannot recover it
+    # Because 'sla-policy' is outside the candidate multiplier pool, reranking cannot recover it
     assert comparison.runs[1].metrics.recall_at_k == 0.0

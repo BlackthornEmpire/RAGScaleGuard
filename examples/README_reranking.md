@@ -29,9 +29,9 @@ The script sets up a curated enterprise corpus containing documents with realist
   - **Baseline**: Ranks an older, stale draft note first because its exact wording matches the query tokens. Ground-truth recall@1 is 0.0.
   - **Reranked**: Promotes the verified Confluence specification (`atlas-approved`) to rank 1 based on its `approved` status and high authority score. Ground-truth recall@1 increases to 1.0.
 
-- **Query 2 (`q_failure`)**: *"What is the secret manual override code for reactor B?"*
-  - **Baseline**: Saturated by 5 identical routine sensor logs that push the correct manual override document to rank 6 (outside the candidate multiplier pool).
-  - **Reranked**: Reranks the 5 routine logs, but because the correct document is missing from the candidate pool, top-$k$ failure persists. Recall@1 remains 0.0.
+- **Query 2 (`q_failure`)**: *"What is the SLA escalation policy for Enterprise Tier customers?"*
+  - **Baseline**: Saturated by 5 identical routine Jira tickets that push the correct policy document to rank 6 (outside the candidate multiplier pool).
+  - **Reranked**: Reranks the 5 routine tickets, but because the correct document is missing from the candidate pool, top-$k$ failure persists. Recall@1 remains 0.0.
 
 ## Report Output
 

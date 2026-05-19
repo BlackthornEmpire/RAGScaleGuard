@@ -40,35 +40,35 @@ def run_reranking_diagnostics() -> None:
             },
         ),
 
-        # Case 2 Documents: Reactor B Emergency Override
+        # Case 2 Documents: SLA Escalation Policy
         Document(
-            id="reactor-noise1",
-            text="What is the secret manual override code for reactor B? Check routine log 1.",
+            id="sla-noise1",
+            text="What is the SLA escalation policy for Enterprise Tier customers? Check routine ticket 1.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
         Document(
-            id="reactor-noise2",
-            text="What is the secret manual override code for reactor B? Check routine log 2.",
+            id="sla-noise2",
+            text="What is the SLA escalation policy for Enterprise Tier customers? Check routine ticket 2.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
         Document(
-            id="reactor-noise3",
-            text="What is the secret manual override code for reactor B? Check routine log 3.",
+            id="sla-noise3",
+            text="What is the SLA escalation policy for Enterprise Tier customers? Check routine ticket 3.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
         Document(
-            id="reactor-noise4",
-            text="What is the secret manual override code for reactor B? Check routine log 4.",
+            id="sla-noise4",
+            text="What is the SLA escalation policy for Enterprise Tier customers? Check routine ticket 4.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
         Document(
-            id="reactor-noise5",
-            text="What is the secret manual override code for reactor B? Check routine log 5.",
+            id="sla-noise5",
+            text="What is the SLA escalation policy for Enterprise Tier customers? Check routine ticket 5.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
         Document(
-            id="reactor-override",
-            text="Manual override code 99382 for reactor B emergency shutdown.",
+            id="sla-policy",
+            text="Enterprise Tier customers receive an automatic SLA escalation after 2 hours of inactivity.",
             metadata={"source_type": "confluence", "status": "approved", "is_verified": True, "created_at": "2026-05-01T10:00:00Z"},
         ),
     ]
@@ -83,9 +83,9 @@ def run_reranking_diagnostics() -> None:
         ),
         Query(
             id="q_failure",
-            text="What is the secret manual override code for reactor B?",
-            ground_truth_document_ids=("reactor-override",),
-            metadata={"expected_source_ids": ["reactor-override"]},
+            text="What is the SLA escalation policy for Enterprise Tier customers?",
+            ground_truth_document_ids=("sla-policy",),
+            metadata={"expected_source_ids": ["sla-policy"]},
         ),
     ]
 
@@ -129,7 +129,7 @@ def run_reranking_diagnostics() -> None:
     print("   - In baseline retrieval, 'atlas-stale' (a draft Slack note from 2021) ranked #1 due to exact token matching.")
     print("   - In reranked retrieval, 'atlas-approved' (an approved Confluence doc) was promoted to #1 using authority and freshness signals.")
     print("2. Reranking Failure Case (Query: q_failure):")
-    print("   - 'reactor-override' was pushed out of the initial candidate pool (top 5) by semantic crowding from routine logs.")
+    print("   - 'sla-policy' was pushed out of the initial candidate pool (top 5) by semantic crowding from routine Jira tickets.")
     print("   - Because the correct document was never retrieved in the baseline candidates, reranking could not promote it into top-k.")
 
 

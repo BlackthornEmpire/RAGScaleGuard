@@ -1,19 +1,18 @@
-# Reranking Diagnostics in RAGScaleGuard
 
-Reranking is one of the most common techniques teams use to improve Retrieval-Augmented Generation (RAG) quality. By decoupling initial fast candidate retrieval from a secondary, more expensive scoring pass (e.g., cross-encoders or heuristic weighting), teams aim to promote the most relevant chunks to the top of the context window.
+Reranking is one of the most common techniques teams use to improve Retrieval-Augmented Generation (RAG) quality. By decoupling initial fast candidate retrieval from a secondary, more expensive scoring pass(eg, cross-encoders or heuristic weighting), teams aim to promote the most relevant chunks to the top of the context window.
 
-However, **reranking does not solve all retrieval failure modes**.
+However, reranking does not solve all retrieval failure modes.
 
-This example demonstrates how RAGScaleGuard evaluates and compares retrieval quality before and after reranking, helping teams diagnose when reranking succeeds and when deeper top-$k$ displacement issues remain.
+This example demonstrates how RAGScaleGuard evaluates and compares retrieval quality before and after reranking, helping teams diagnose when reranking succeeds and when deeper top-k displacement issues remain.
 
-## Why This Matters
+# Why This Matters
 
 When evaluating RAG retrieval, teams often encounter two distinct failure scenarios:
 
-1. **Reranking Success (Candidate Reordering)**: The ground-truth document was successfully retrieved by the baseline retriever (BM25 or dense embedding) but placed at rank 4 or 5 due to semantic crowding or exact keyword matching from older draft notes. Reranking evaluates authority, freshness, and verified status metadata to successfully promote the canonical document to rank 1.
-2. **Reranking Failure (Candidate Absence)**: The initial retrieval candidate pool (`top_k * candidate_multiplier`) is completely saturated by highly repetitive routine logs or noisy chunks. Because the ground-truth document was never retrieved in the baseline candidate set, reranking cannot recover it. Reranking can only reorder what has already been retrieved.
+1. Reranking Success (Candidate Reordering): The ground-truth document was successfully retrieved by the baseline retriever (BM25 or dense embedding) but placed at rank 4 or 5 due to semantic crowding or exact keyword matching from older draft notes. Reranking evaluates authority, freshness, and verified status metadata to successfully promote the canonical document to rank 1.
+2. Reranking Failure (Candidate Absence): The initial retrieval candidate pool (`top_k candidate_multiplier`) is completely saturated by highly repetitive routine logs or noisy chunks. Because the ground-truth document was never retrieved in the baseline candidate set, reranking cannot recover it. Reranking can only reorder what has already been retrieved.
 
-## Running the Example
+# Running the Example
 
 You can run the bundled diagnostic example locally without needing any external API keys or paid services:
 
@@ -21,7 +20,7 @@ You can run the bundled diagnostic example locally without needing any external 
 python examples/reranking_diagnostics.py
 ```
 
-## What the Example Does
+# What the Example Does
 
 The script sets up a curated enterprise corpus containing documents with realistic metadata (`status`, `is_verified`, `source_type`, `created_at`) and runs two test queries at `top_k=1`:
 

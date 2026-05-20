@@ -29,7 +29,7 @@ def test_reranking_diagnostics_script_execution() -> None:
 
 
 def test_reranking_promotes_canonical_evidence() -> None:
-    # Setup test case mirroring the success case from the example script exactly
+
     documents = [
         Document(
             id="atlas-stale",
@@ -72,9 +72,9 @@ def test_reranking_promotes_canonical_evidence() -> None:
     baseline_run = comparison.runs[0]
     reranked_run = comparison.runs[1]
 
-    # In baseline, exact keyword match puts stale first
+
     assert baseline_run.metrics.recall_at_k == 0.0
-    # Reranking promotes approved doc based on authority and verified status
+
     assert reranked_run.metrics.recall_at_k == 1.0
 
 
@@ -96,7 +96,7 @@ def test_reranking_cannot_recover_unretrieved_evidence() -> None:
 
     comparison = compare_retrievers(retrievers, queries, top_k=1)
 
-    # In baseline, noise documents occupy top 5 slots
+    # baseline, noise documents occupy top 5 slots
     assert comparison.runs[0].metrics.recall_at_k == 0.0
-    # Because 'sla-policy' is outside the candidate multiplier pool, reranking cannot recover it
+
     assert comparison.runs[1].metrics.recall_at_k == 0.0
